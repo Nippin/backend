@@ -23,7 +23,6 @@ namespace Backend
 
         // dynamically recognized token used for querying web services @ ppuslugi
         private string callToken = null;
-        private string callSource = null;
 
         public VatPaymentChecker()
         {
@@ -46,8 +45,6 @@ namespace Backend
         {
             var result = await client.GetAsync("https://ppuslugi.mf.gov.pl/_/");
             callToken = result.Headers.First(it => it.Key == "Fast-Ver-Last").Value.First();
-            callSource = result.Headers.First(it => it.Key == "Fast-Ver-Source").Value.First();
-
         }
 
         /// <summary>
@@ -57,13 +54,11 @@ namespace Backend
         /// <returns></returns>
         public async ValueTask<string> Check(string VIN)
         {
-
             using (var formContent = CreateForm(("ACTION__", "1005"), ("FAST_VERLAST__", callToken)))
             {
                 var result = await client.PostAsync("https://ppuslugi.mf.gov.pl/_/ExecuteAction", formContent);
                 result.EnsureSuccessStatusCode();
                 callToken = result.Headers.First(it => it.Key == "Fast-Ver-Last").Value.First();
-                callSource = result.Headers.First(it => it.Key == "Fast-Ver-Source").Value.First();
             }
 
             using (var formContent =
@@ -72,7 +67,6 @@ namespace Backend
                 var result = await client.PostAsync("https://ppuslugi.mf.gov.pl/_/Recalc", formContent);
                 result.EnsureSuccessStatusCode();
                 callToken = result.Headers.First(it => it.Key == "Fast-Ver-Last").Value.First();
-                callSource = result.Headers.First(it => it.Key == "Fast-Ver-Source").Value.First();
             }
 
             using (var formContent =
@@ -83,7 +77,6 @@ namespace Backend
                 var result = await client.PostAsync("https://ppuslugi.mf.gov.pl/_/EventOccurred", formContent);
                 result.EnsureSuccessStatusCode();
                 callToken = result.Headers.First(it => it.Key == "Fast-Ver-Last").Value.First();
-                callSource = result.Headers.First(it => it.Key == "Fast-Ver-Source").Value.First();
 
                 var content = await result.Content.ReadAsStringAsync();
                 var jsonContent = JsonConvert.DeserializeObject<EventOccurredResponseModel>(content);

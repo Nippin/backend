@@ -52,6 +52,25 @@ namespace Backend
             }
         }
 
+        /// <summary>
+        /// Single VatPaymentChecker need to be able to check sequentially multiple VIMs
+        /// In other works, the checker need to be reusable for multiple checks.
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task CheckMultipleTimes()
+        {
+            const string validVIN = "7251947829"; // GFT Poland
+            using (var checker = new VatPaymentChecker())
+            {
+                await checker.Initialize();
+
+                await checker.Check(validVIN);
+                var result = await checker.Check(validVIN);
+
+                Assert.Equal(result, "Podmiot o podanym identyfikatorze podatkowym NIP jest zarejestrowany jako podatnik VAT czynny  Dodatkowo informujemy, i¿ w celu potwierdzenia czy podmiot jest zarejestrowany jako podatnik VAT czynny,  podatnik i osoba trzecia maj¹ca interes prawny, mog¹ z³o¿yæ do w³aœciwego naczelnika urzêdu skarbowego wniosek o wydanie zaœwiadczenia.");
+            }
+        }
 
         // The shortest linear path how to recognize valid VAT taxpayer.
         [Fact]
@@ -65,14 +84,11 @@ namespace Backend
             };
 
             string callToken;
-            string callSource;
 
             var client = new HttpClient(handler);
             {
                 var result = await client.GetAsync("https://ppuslugi.mf.gov.pl/_/");
-
                 callToken = result.Headers.First(it => it.Key == "Fast-Ver-Last").Value.First();
-                callSource = result.Headers.First(it => it.Key == "Fast-Ver-Source").Value.First();
             }
 
 
@@ -88,7 +104,6 @@ namespace Backend
                     var result = await client.PostAsync("https://ppuslugi.mf.gov.pl/_/ExecuteAction", form);
                     result.EnsureSuccessStatusCode();
                     callToken = result.Headers.First(it => it.Key == "Fast-Ver-Last").Value.First();
-                    callSource = result.Headers.First(it => it.Key == "Fast-Ver-Source").Value.First();
                 }
             }
 
@@ -106,7 +121,6 @@ namespace Backend
                     var result = await client.PostAsync("https://ppuslugi.mf.gov.pl/_/Recalc", form);
                     result.EnsureSuccessStatusCode();
                     callToken = result.Headers.First(it => it.Key == "Fast-Ver-Last").Value.First();
-                    callSource = result.Headers.First(it => it.Key == "Fast-Ver-Source").Value.First();
                 }
             }
 
@@ -125,7 +139,6 @@ namespace Backend
                     var result = await client.PostAsync("https://ppuslugi.mf.gov.pl/_/EventOccurred", form);
                     result.EnsureSuccessStatusCode();
                     callToken = result.Headers.First(it => it.Key == "Fast-Ver-Last").Value.First();
-                    callSource = result.Headers.First(it => it.Key == "Fast-Ver-Source").Value.First();
 
                     var content = await result.Content.ReadAsStringAsync();
                     var jsonContent = JsonConvert.DeserializeObject<EventOccurredResponseModel>(content);
