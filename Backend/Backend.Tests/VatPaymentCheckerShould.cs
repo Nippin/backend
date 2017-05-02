@@ -149,12 +149,5 @@ namespace Backend
             public string pagetitle;
             public string html;
         }
-
-        public static string ToUnixTime()
-        {
-            var date = DateTime.Now;
-            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            return Convert.ToInt64((date.ToUniversalTime() - epoch).TotalSeconds).ToString();
-        }
     }
 }
