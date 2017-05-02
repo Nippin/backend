@@ -106,16 +106,12 @@ namespace Backend
             return new FormUrlEncodedContent(values);
         }
 
+        /// <summary>
+        /// Disposes internal HtmlClient used to obtain html content from ppuslugi.
+        /// </summary>
         public void Dispose()
         {
             client.Dispose();
-        }
-
-        public static string ToUnixTime()
-        {
-            var date = DateTime.Now;
-            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            return Convert.ToInt64((date.ToUniversalTime() - epoch).TotalSeconds).ToString();
         }
     }
 
