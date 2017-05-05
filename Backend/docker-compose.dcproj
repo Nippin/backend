@@ -3,7 +3,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>ed9efa0f-db2a-4d93-96bd-d2dac3908e5c</ProjectGuid>
     <DockerLaunchBrowser>True</DockerLaunchBrowser>
-    <DockerServiceUrl>http://localhost:{ServicePort}/api/values</DockerServiceUrl>
+    <DockerServiceUrl>http://localhost:{ServicePort}/</DockerServiceUrl>
     <DockerServiceName>endpoint</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
