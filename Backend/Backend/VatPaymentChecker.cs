@@ -50,9 +50,9 @@ namespace Backend
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="VIN">VAT identification number.</param>
+        /// <param name="VATIN">VAT identification number.</param>
         /// <returns></returns>
-        public async ValueTask<string> Check(string VIN)
+        public async ValueTask<string> Check(string VATIN)
         {
             using (var formContent = CreateForm(("ACTION__", "1005"), ("FAST_VERLAST__", callToken)))
             {
@@ -62,7 +62,7 @@ namespace Backend
             }
 
             using (var formContent =
-                CreateForm(("b-6", "NIP"), ("b-7", VIN), ("DOC_MODAL_ID__", "0"), ("FAST_VERLAST__", callToken)))
+                CreateForm(("b-6", "NIP"), ("b-7", VATIN), ("DOC_MODAL_ID__", "0"), ("FAST_VERLAST__", callToken)))
             {
                 var result = await client.PostAsync("https://ppuslugi.mf.gov.pl/_/Recalc", formContent);
                 result.EnsureSuccessStatusCode();
@@ -71,7 +71,7 @@ namespace Backend
 
             using (var formContent =
                 CreateForm(
-                    ("b-6", "NIP"), ("b-7", VIN), ("DOC_MODAL_ID__", "0"), ("EVENT__", "b-8"), ("FAST_VERLAST__", callToken)
+                    ("b-6", "NIP"), ("b-7", VATIN), ("DOC_MODAL_ID__", "0"), ("EVENT__", "b-8"), ("FAST_VERLAST__", callToken)
                 ))
             {
                 var result = await client.PostAsync("https://ppuslugi.mf.gov.pl/_/EventOccurred", formContent);

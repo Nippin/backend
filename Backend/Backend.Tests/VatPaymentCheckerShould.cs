@@ -12,41 +12,41 @@ namespace Backend
     public sealed class VatPaymentCheckerShould
     {
         [Fact]
-        public async Task CheckVIN_of_VATtaxpayer()
+        public async Task CheckVATIN_of_VATtaxpayer()
         {
-            const string validVIN = "7251947829"; // GFT Poland
+            const string validVATIN = "7251947829"; // GFT Poland
             using (var checker = new VatPaymentChecker())
             {
                 await checker.Initialize();
-                var result = await checker.Check(validVIN);
+                var result = await checker.Check(validVATIN);
 
                 Assert.Equal(result, "Podmiot o podanym identyfikatorze podatkowym NIP jest zarejestrowany jako podatnik VAT czynny  Dodatkowo informujemy, i¿ w celu potwierdzenia czy podmiot jest zarejestrowany jako podatnik VAT czynny,  podatnik i osoba trzecia maj¹ca interes prawny, mog¹ z³o¿yæ do w³aœciwego naczelnika urzêdu skarbowego wniosek o wydanie zaœwiadczenia.");
             }
         }
 
         [Fact]
-        public async Task CheckVIN_of_nonVATtaxpayer()
+        public async Task CheckVATIN_of_nonVATtaxpayer()
         {
-            const string validVIN = "7331184612";
+            const string validVATIN = "7331184612";
 
             using (var checker = new VatPaymentChecker())
             {
                 await checker.Initialize();
-                var result = await checker.Check(validVIN);
+                var result = await checker.Check(validVATIN);
 
                 Assert.Equal(result, "Podmiot o podanym identyfikatorze podatkowym NIP nie jest zarejestrowany jako podatnik VAT");
             }
         }
 
         [Fact]
-        public async Task CheckVIN_of_fakeTaxPayer()
+        public async Task CheckVATIN_of_fakeTaxPayer()
         {
-            const string vin = "7473137775";
+            const string vatin = "7473137775";
 
             using (var checker = new VatPaymentChecker())
             {
                 await checker.Initialize();
-                var result = await checker.Check(vin);
+                var result = await checker.Check(vatin);
 
                 Assert.Equal(result, "Podmiot o podanym identyfikatorze podatkowym NIP nie jest zarejestrowany jako podatnik VAT");
             }
@@ -60,13 +60,13 @@ namespace Backend
         [Fact]
         public async Task CheckMultipleTimes()
         {
-            const string validVIN = "7251947829"; // GFT Poland
+            const string validVATIN = "7251947829"; // GFT Poland
             using (var checker = new VatPaymentChecker())
             {
                 await checker.Initialize();
 
-                await checker.Check(validVIN);
-                var result = await checker.Check(validVIN);
+                await checker.Check(validVATIN);
+                var result = await checker.Check(validVATIN);
 
                 Assert.Equal(result, "Podmiot o podanym identyfikatorze podatkowym NIP jest zarejestrowany jako podatnik VAT czynny  Dodatkowo informujemy, i¿ w celu potwierdzenia czy podmiot jest zarejestrowany jako podatnik VAT czynny,  podatnik i osoba trzecia maj¹ca interes prawny, mog¹ z³o¿yæ do w³aœciwego naczelnika urzêdu skarbowego wniosek o wydanie zaœwiadczenia.");
             }
