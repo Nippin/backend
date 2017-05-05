@@ -6,10 +6,10 @@ using Xunit;
 
 namespace Endpoint
 {
-    public class EndpointShould
+    public sealed class EndpointShould
     {
         [Fact]
-        public async Task Return_status_ok_when_route_exists()
+        public async Task ReturnHomePage()
         {
             // Given
             var bootstrapper = new DefaultNancyBootstrapper();
@@ -23,6 +23,25 @@ namespace Endpoint
 
             // Then
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
+        }
+
+        [Fact]
+        public async Task ShouldCheckWellKnownTaxPayer()
+        {
+            var bootstrapper = new DefaultNancyBootstrapper();
+            var browser = new Browser(bootstrapper);
+
+            // When
+            var response = await browser.Get("/vatin/5213017228", with =>
+            {
+                with.HttpRequest();
+                with.Accept(new Nancy.Responses.Negotiation.MediaRange("application/json"));
+            });
+
+            // Then
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var result = response.Body.DeserializeJson<dynamic>();
+            Assert.NotEmpty(result.Response);
         }
     }
 }
