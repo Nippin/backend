@@ -8,12 +8,14 @@ dist: trusty
 
 script:
   - dotnet restore --verbosity quiet nippin.sln
-  # in Release docker build is unchecked - it doesn't work on Travis
-  - dotnet build /p:Configuration=Release nippin.sln
-  - dotnet test Backend.Tests/Backend.Tests.csproj
-  - dotnet test Endpoint.Tests/Endpoint.Tests.csproj
 
-  - dotnet publish /p:Configuration=Release -o publish
+  # run well-known test's projects. If you would like to add new test projects
+  # it needs to be included in that place.
+  - dotnet test -c Release Backend.Tests/Backend.Tests.csproj
+  - dotnet test -c Release Endpoint.Tests/Endpoint.Tests.csproj
+  
+  # produce artifacts and pack them to docker image
+  - dotnet publish /p:Configuration=Release -o publish Endpoint/Endpoint.csproj
   - docker build -t siudeks/nippin Endpoint/publish
 
 # sudo is required for docker https://docs.travis-ci.com/user/docker/
