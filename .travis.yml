@@ -1,8 +1,11 @@
 # travis need to have provided language type to start proper build process.
 language: csharp
-solution: nippin.sln
 
 # csharp build is started with mono, so need to disable mono and include dotnet
 mono: none
 dotnet: 1.0.3
 dist: trusty
+
+script:
+  - dotnet build nippin.sln
+
