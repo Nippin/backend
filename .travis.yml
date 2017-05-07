@@ -25,9 +25,9 @@ services:
 
 after_success:
   # push application image to docker registry
-  #- if [ "$TRAVIS_BRANCH" == "master" ]; then
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
     docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
     docker push siudeks/nippin;
-  #  fi
+    fi
 
 
