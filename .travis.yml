@@ -7,5 +7,6 @@ dotnet: 1.0.3
 dist: trusty
 
 script:
+  - dotnet restore nippin.sln
   - dotnet build nippin.sln
 
