@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+ï»¿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +20,7 @@ namespace Backend
                 await checker.Initialize();
                 var result = await checker.Check(validVATIN);
 
-                Assert.Equal(result, "Podmiot o podanym identyfikatorze podatkowym NIP jest zarejestrowany jako podatnik VAT czynny  Dodatkowo informujemy, i¿ w celu potwierdzenia czy podmiot jest zarejestrowany jako podatnik VAT czynny,  podatnik i osoba trzecia maj¹ca interes prawny, mog¹ z³o¿yæ do w³aœciwego naczelnika urzêdu skarbowego wniosek o wydanie zaœwiadczenia.");
+                Assert.Equal(result, "Podmiot o podanym identyfikatorze podatkowym NIP jest zarejestrowany jako podatnik VAT czynny  Dodatkowo informujemy, iÅ¼ w celu potwierdzenia czy podmiot jest zarejestrowany jako podatnik VAT czynny,  podatnik i osoba trzecia majÄ…ca interes prawny, mogÄ… zÅ‚oÅ¼yÄ‡ do wÅ‚aÅ›ciwego naczelnika urzÄ™du skarbowego wniosek o wydanie zaÅ›wiadczenia.");
             }
         }
 
@@ -68,7 +68,7 @@ namespace Backend
                 await checker.Check(validVATIN);
                 var result = await checker.Check(validVATIN);
 
-                Assert.Equal(result, "Podmiot o podanym identyfikatorze podatkowym NIP jest zarejestrowany jako podatnik VAT czynny  Dodatkowo informujemy, i¿ w celu potwierdzenia czy podmiot jest zarejestrowany jako podatnik VAT czynny,  podatnik i osoba trzecia maj¹ca interes prawny, mog¹ z³o¿yæ do w³aœciwego naczelnika urzêdu skarbowego wniosek o wydanie zaœwiadczenia.");
+                Assert.Equal(result, "Podmiot o podanym identyfikatorze podatkowym NIP jest zarejestrowany jako podatnik VAT czynny  Dodatkowo informujemy, iÅ¼ w celu potwierdzenia czy podmiot jest zarejestrowany jako podatnik VAT czynny,  podatnik i osoba trzecia majÄ…ca interes prawny, mogÄ… zÅ‚oÅ¼yÄ‡ do wÅ‚aÅ›ciwego naczelnika urzÄ™du skarbowego wniosek o wydanie zaÅ›wiadczenia.");
             }
         }
 
@@ -148,7 +148,7 @@ namespace Backend
 
                     var information = doc.GetElementbyId("caption2_b-3");
                     Assert.Equal(
-                        information.InnerText, "Podmiot o podanym identyfikatorze podatkowym NIP jest zarejestrowany jako podatnik VAT czynny  Dodatkowo informujemy, i¿ w celu potwierdzenia czy podmiot jest zarejestrowany jako podatnik VAT czynny,  podatnik i osoba trzecia maj¹ca interes prawny, mog¹ z³o¿yæ do w³aœciwego naczelnika urzêdu skarbowego wniosek o wydanie zaœwiadczenia.");
+                        information.InnerText, "Podmiot o podanym identyfikatorze podatkowym NIP jest zarejestrowany jako podatnik VAT czynny  Dodatkowo informujemy, iÅ¼ w celu potwierdzenia czy podmiot jest zarejestrowany jako podatnik VAT czynny,  podatnik i osoba trzecia majÄ…ca interes prawny, mogÄ… zÅ‚oÅ¼yÄ‡ do wÅ‚aÅ›ciwego naczelnika urzÄ™du skarbowego wniosek o wydanie zaÅ›wiadczenia.");
 
 
                 }
