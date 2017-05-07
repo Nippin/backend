@@ -62,14 +62,6 @@ namespace Backend
             }
 
             using (var formContent =
-                CreateForm(("b-6", "NIP"), ("b-7", VATIN), ("DOC_MODAL_ID__", "0"), ("FAST_VERLAST__", callToken)))
-            {
-                var result = await client.PostAsync("https://ppuslugi.mf.gov.pl/_/Recalc", formContent);
-                result.EnsureSuccessStatusCode();
-                callToken = result.Headers.First(it => it.Key == "Fast-Ver-Last").Value.First();
-            }
-
-            using (var formContent =
                 CreateForm(
                     ("b-6", "NIP"), ("b-7", VATIN), ("DOC_MODAL_ID__", "0"), ("EVENT__", "b-8"), ("FAST_VERLAST__", callToken)
                 ))
