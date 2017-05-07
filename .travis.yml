@@ -7,7 +7,7 @@ dotnet: 1.0.3
 dist: trusty
 
 script:
-  - dotnet restore nippin.sln
+  - dotnet restore --verbosity quiet nippin.sln
   # in Release docker build is unchecked - it doesn't work on Travis
   - dotnet build /p:Configuration=Release nippin.sln
   - dotnet build /p:Configuration=Release nippin.sln
