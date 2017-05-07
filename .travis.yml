@@ -8,7 +8,8 @@ dist: trusty
 
 script:
   - dotnet restore nippin.sln
-  - dotnet build nippin.sln
+  # in Release docker build is unchecked - it doesn't work on Travis
+  - dotnet build /p:Configuration=Release nippin.sln
 
 # sudo is required for docker https://docs.travis-ci.com/user/docker/
 sudo: required
