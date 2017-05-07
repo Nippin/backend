@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 
@@ -17,6 +13,9 @@ namespace Endpoint
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseStartup<Startup>()
                 .UseApplicationInsights()
+                // Open Owin application for the internet 
+                // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel
+                .UseUrls("http://*:5000/")
                 .Build();
 
             host.Run();
