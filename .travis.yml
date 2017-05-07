@@ -10,7 +10,10 @@ script:
   - dotnet restore nippin.sln
   # in Release docker build is unchecked - it doesn't work on Travis
   - dotnet build /p:Configuration=Release nippin.sln
-
+  - dotnet build /p:Configuration=Release nippin.sln
+  - dotnet test Backend.Tests/Backend.Tests.csproj
+  - dotnet test Endpoint.Tests/Endpoint.Tests.csproj
+  
 # sudo is required for docker https://docs.travis-ci.com/user/docker/
 sudo: required
 services:
