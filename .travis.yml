@@ -10,3 +10,8 @@ script:
   - dotnet restore nippin.sln
   - dotnet build nippin.sln
 
+# sudo is required for docker https://docs.travis-ci.com/user/docker/
+sudo: required
+services:
+  - docker
+
