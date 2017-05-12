@@ -1,4 +1,7 @@
-﻿using Akka.TestKit.Xunit2;
+﻿using Akka.Actor;
+using Akka.TestKit.Xunit2;
+using OpenQA.Selenium;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
@@ -19,6 +22,16 @@ namespace Backend
             Sys.Stop(actor);
             AwaitCondition(() => client.GetSessionsAsync().Result.value?.Count == sessionCount);
             Assert.Equal(sessionCount, client.GetSessionsAsync().Result.value?.Count);
+        }
+
+        [Fact]
+        public async Task ShouldDownloadScreenshot()
+        {
+            var actor = ActorOf<BrowserActor>();
+            var pictureAsRawData = await actor.Ask<BrowserActor.TakeScreenshotReply>(new BrowserActor.TakeScreenshot());
+
+            // for test purpose is enough when Screenshot is able to accept returned value as a screenshot.
+            new Screenshot(pictureAsRawData.Screenshot);
         }
     }
 }
