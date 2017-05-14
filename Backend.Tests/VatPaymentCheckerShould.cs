@@ -14,7 +14,7 @@ namespace Backend
         [Fact]
         public async Task CheckVATIN_of_VATtaxpayer()
         {
-            const string validVATIN = "7251947829"; // GFT Poland
+            const string validVATIN = "5213017228"; // ZUS
             using (var checker = new VatPaymentChecker())
             {
                 await checker.Initialize();

@@ -62,5 +62,21 @@ namespace Endpoint
             var result = response.Body.AsString();
             Assert.NotEmpty(result);
         }
+
+        [Fact]
+        public async Task ShouldReturnScreenshot()
+        {
+            var bootstrapper = new DefaultNancyBootstrapper();
+            var browser = new Browser(bootstrapper);
+
+            // When
+            var response = await browser.Get("/api/screenshot/5213017228", with =>
+            {
+                with.HttpRequest();
+            });
+
+            // Then
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
     }
 }
