@@ -131,10 +131,9 @@ namespace Backend
             }
 
             var screenshot = browser.GetScreenshot().AsBase64EncodedString;
+            Sender.Tell(new CheckVatinReply(true, screenshot));
 
             browser.Navigate().GoToUrl("https://ppuslugi.mf.gov.pl/?link=VAT");
-
-            Sender.Tell(new CheckVatinReply(true, screenshot));
             return true;
         }
     }

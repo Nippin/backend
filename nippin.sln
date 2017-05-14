@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E966CE4B-E0D5-4939-AB49-53FCE2283BD4}"
 	ProjectSection(SolutionItems) = preProject
 		.travis.yml = .travis.yml
+		docker-compose.yml = docker-compose.yml
 		README.md = README.md
 	EndProjectSection
 EndProject

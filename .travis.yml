@@ -7,6 +7,9 @@ dotnet: 1.0.3
 dist: trusty
 
 script:
+  # run services required for tests
+  - docker-compose --file docker-compose.yml up &
+
   - dotnet restore --verbosity quiet nippin.sln
 
   # run well-known test's projects. If you would like to add new test projects
