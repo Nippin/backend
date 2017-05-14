@@ -6,12 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="NoData.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.2" />
@@ -19,9 +13,13 @@
     <PackageReference Include="Nancy.Validation.FluentValidation" Version="2.0.0-clinteastwood" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Owin" Version="1.1.1" />
+    <PackageReference Include="System.Reactive.PlatformServices" Version="3.1.1" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Actors.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Backend\Backend.csproj" />

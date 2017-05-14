@@ -19,6 +19,8 @@ namespace Endpoint
                 .Build();
 
             host.Run();
+
+            Actors.ActorSystem.Terminate().Wait();
         }
     }
 }

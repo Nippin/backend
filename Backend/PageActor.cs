@@ -27,7 +27,9 @@ namespace Backend
                 this.Screenshot = screenshot;
             }
 
-            // serialized as string with with Screenshot.AsBase64EncodedString
+            /// <summary>
+            /// Serialized as string with with Screenshot.AsBase64EncodedString. Can be constructed back with Selenium Screenshot object.
+            /// </summary>
             public string Screenshot { get; set; }
         }
 
@@ -51,11 +53,13 @@ namespace Backend
         /// </summary>
         public sealed class CheckVatinReply
         {
-            public CheckVatinReply(bool done)
+            public CheckVatinReply(bool done, string screenshot)
             {
                 Done = done;
+                Screenshot = screenshot;
             }
             public bool Done { get; set; }
+            public string Screenshot { get; set; }
         }
 
         public PageActor()
@@ -74,7 +78,6 @@ namespace Backend
 
         protected override void PostStop()
         {
-            browser.Close();
             browser.Dispose();
 
             base.PostStop();
@@ -96,6 +99,7 @@ namespace Backend
         {
             var vatinInput = default(IWebElement);
             var submitButton = default(IWebElement);
+
             try
             {
                 vatinInput = browser.FindElementById("b-7");
@@ -103,13 +107,34 @@ namespace Backend
             }
             catch (NoSuchElementException ex)
             {
-                Sender.Tell(new CheckVatinReply(false));
+                Sender.Tell(new CheckVatinReply(false, null));
+                return true;
             }
 
             vatinInput.SendKeys(msg.Vatin);
             submitButton.Click();
 
-            Sender.Tell(new CheckVatinReply(true));
+            // two possible scenarios
+            // exists: 
+            // id: indicator_b-7. Error message about invalid NIP
+            // means: operation finished, data non accepted. Ready for screenshot
+            // id: b-9. Button to allow clear and repeat operation
+
+            var now = DateTime.Now;
+            while ((DateTime.Now - now) < TimeSpan.FromSeconds(10))
+            {
+                try { var clearButton = browser.FindElementById("b-9"); }
+                catch (NoSuchElementException ignored) { }
+
+                try { var errorInfo = browser.FindElementById("indicator_b-7"); }
+                catch (NoSuchElementException ignored) { }
+            }
+
+            var screenshot = browser.GetScreenshot().AsBase64EncodedString;
+
+            browser.Navigate().GoToUrl("https://ppuslugi.mf.gov.pl/?link=VAT");
+
+            Sender.Tell(new CheckVatinReply(true, screenshot));
             return true;
         }
     }
