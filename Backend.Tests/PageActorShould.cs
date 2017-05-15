@@ -33,7 +33,7 @@ namespace Backend
         public async Task ShouldDownloadScreenshot()
         {
             var actor = ActorOf<PageActor>();
-            var pictureAsRawData = await actor.Ask<PageActor.TakeScreenshotReply>(new PageActor.TakeScreenshotAsk());
+            var pictureAsRawData = await actor.Ask<PageActor.TakeScreenshotReply>(new PageActor.TakeScreenshotAsk(), TimeSpan.FromSeconds(20));
             // No exceptions => Success
             new Screenshot(pictureAsRawData.Screenshot);
         }
@@ -42,7 +42,7 @@ namespace Backend
         public async Task ShouldCheckWellKnownTaxPayer()
         {
             var actor = ActorOf<PageActor>();
-            var reply = await actor.Ask<PageActor.CheckVatinReply>(new PageActor.CheckVatinAsk("5213017228")); // 521 301 72 28 - VATIN of ZUS
+            var reply = await actor.Ask<PageActor.CheckVatinReply>(new PageActor.CheckVatinAsk("5213017228"), TimeSpan.FromSeconds(20)); // 521 301 72 28 - VATIN of ZUS
             Assert.True(reply.Done);
         }
 

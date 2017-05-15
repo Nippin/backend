@@ -1,5 +1,6 @@
 using Nancy;
 using Nancy.Testing;
+using System;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -19,7 +20,7 @@ namespace Endpoint
             var result = await browser.Get("/", with =>
             {
                 with.HttpRequest();
-            });
+            }).WithTimeout(20);
 
             // Then
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
@@ -36,7 +37,8 @@ namespace Endpoint
             {
                 with.HttpRequest();
                 with.Accept(new Nancy.Responses.Negotiation.MediaRange("application/json"));
-            });
+            }).WithTimeout(20);
+
 
             // Then
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -55,7 +57,7 @@ namespace Endpoint
             {
                 with.HttpRequest();
                 with.Accept(new Nancy.Responses.Negotiation.MediaRange("application/json"));
-            });
+            }).WithTimeout(20);
 
             // Then
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -73,7 +75,7 @@ namespace Endpoint
             var response = await browser.Get("/api/screenshot/5213017228", with =>
             {
                 with.HttpRequest();
-            });
+            }).WithTimeout(20);
 
             // Then
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
