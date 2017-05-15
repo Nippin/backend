@@ -8,6 +8,7 @@ dist: trusty
 
 script:
   # run services required for tests
+  - docker-compose pull
   - docker-compose --file docker-compose.yml up &
 
   - dotnet restore --verbosity quiet nippin.sln
