@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Endpoint
+namespace Nippin
 {
 
     public static class TaskExtensions

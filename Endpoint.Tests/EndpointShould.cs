@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Xunit;
 
 
-namespace Endpoint
+namespace Nippin
 {
     public sealed class EndpointShould
     {

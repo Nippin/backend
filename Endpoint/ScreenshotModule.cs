@@ -16,7 +16,7 @@ namespace Endpoint
             Get("{id}", async (_) =>
             {
                 var id = (string)_.id;
-                var response = await Actors.PageActor.Ask<PageActor.CheckVatinReply>(new PageActor.CheckVatinAsk(id));
+                var response = await Actors.PageActor.Ask<PageActor.CheckVatinReply>(new PageActor.CheckVatinAsk(id, DateTime.Now));
                 if (!response.Done) return HttpStatusCode.BadGateway;
 
                 var screenshot = new Screenshot(response.Screenshot);
