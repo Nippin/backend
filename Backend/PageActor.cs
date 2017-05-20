@@ -68,6 +68,15 @@ namespace Backend
             public string Screenshot { get; set; }
         }
 
+        public sealed class BrowserInitialized
+        {
+            public bool Success { get; private set; }
+            public BrowserInitialized(bool success)
+            {
+                Success = success;
+            }
+        }
+
         public sealed class GoToCheckkVatinPageFinished
         {
             public GoToCheckkVatinPageFinished(bool success)
@@ -87,7 +96,7 @@ namespace Backend
 
             When(States.Initialized, @event =>
             {
-                if (@event.FsmEvent is GoToCheckkVatinPageFinished msg && msg.Success)
+                if (@event.FsmEvent is BrowserInitialized msg && msg.Success)
                 {
                     return GoTo(States.Operational);
                 }
@@ -138,9 +147,14 @@ namespace Backend
         protected override void PreStart()
         {
             browser
-                .GoToUrl("https://ppuslugi.mf.gov.pl/?link=VAT")
-                .ContinueWith(t => new GoToCheckkVatinPageFinished(t.IsCompleted && !t.IsFaulted))
+                .Initialize()
+                .ContinueWith(t => new BrowserInitialized(t.Status == TaskStatus.RanToCompletion))
                 .PipeTo(Self);
+
+            //browser
+            //    .GoToUrl("https://ppuslugi.mf.gov.pl/?link=VAT")
+            //    .ContinueWith(t => new GoToCheckkVatinPageFinished(t.IsCompleted && !t.IsFaulted))
+            //    .PipeTo(Self);
 
             base.PreStart();
         }

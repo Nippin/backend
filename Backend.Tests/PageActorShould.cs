@@ -11,6 +11,10 @@ namespace Backend
 {
     public sealed class PageActorShould : TestKit
     {
+        /// <summary>
+        /// When PageActor can't initialize browser, need to make suicide because the actor
+        /// and browser instance are double linked in term of lifecycle.
+        /// </summary>
         [Fact]
         public void FailWhenCantConnectToBrowser()
         {
@@ -18,7 +22,9 @@ namespace Backend
             browser.Initialize().Returns(Task.FromException(new Exception()));
 
             var actor = ActorOfAsTestFSMRef<PageActor, States, dynamic>(() => new PageActor(() => browser));
-
+            var prober = CreateTestProbe();
+            prober.Watch(actor);
+            prober.ExpectTerminated(actor);
 
         }
 
