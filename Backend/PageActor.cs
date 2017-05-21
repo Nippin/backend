@@ -109,13 +109,6 @@ namespace Backend
             {
                 switch (@event.FsmEvent)
                 {
-                    case PageLocatingResult<CheckVatinQueryPage> msg when msg.Success:
-                        // Let's restore all message fro mStash - it is safe place for client requests
-                        // which were postponed (if any exists) antil now
-                        Stash.UnstashAll();
-
-                        // now it's tim to go to Operational state where it'll be waiting for requests.
-                        return GoTo(States.Operational);
                     case BrowserInitialized msg when msg.Success:
                         browser
                             .GoToUrl("https://ppuslugi.mf.gov.pl/?link=VAT")
@@ -130,6 +123,14 @@ namespace Backend
                             .PipeTo(Self);
 
                         return Stay();
+
+                    case PageLocatingResult<CheckVatinQueryPage> msg when msg.Success:
+                        // Let's restore all message fro mStash - it is safe place for client requests
+                        // which were postponed (if any exists) antil now
+                        Stash.UnstashAll();
+
+                        // now it's tim to go to Operational state where it'll be waiting for requests.
+                        return GoTo(States.Operational);
 
                     case PageLocatingResult<CheckVatinQueryPage> msg1 when !msg1.Success:
                     case BrowserInitialized msg2 when !msg2.Success:

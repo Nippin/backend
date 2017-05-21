@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
+using System;
 using System.Threading.Tasks;
 
 namespace Backend
@@ -17,11 +18,12 @@ namespace Backend
 
             return Task.Run(() =>
             {
-                var vatinInput = driver.FindElementById("b-7").AsInput();
-                var submitButton = driver.FindElementById("b-8").AsButton();
+                var vatinInput = driver.AsInput(d => d.FindElementById("b-7"));
+                var submitButton = driver.AsButton(d => d.FindElementById("b-8"));
 
                 Vatin = vatinInput;
                 Submit = submitButton;
+
             });
         }
     }

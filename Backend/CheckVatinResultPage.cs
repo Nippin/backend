@@ -1,6 +1,6 @@
-﻿using OpenQA.Selenium.Remote;
+﻿using Nippin;
+using OpenQA.Selenium.Remote;
 using System.Threading.Tasks;
-using System;
 
 namespace Backend
 {
@@ -16,7 +16,7 @@ namespace Backend
 
             return Task.Run(() =>
             {
-                var clearButton = driver.FindElementById("b-9").AsButton();
+                var clearButton = driver.AsButton(d => d.FindElementById("b-9"));
 
                 Clear = clearButton;
             });

@@ -1,19 +1,38 @@
 ﻿using System;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Remote;
 
 namespace Backend
 {
     sealed class SeleniumButton : IButton
     {
-        private readonly IWebElement nativeElement;
-        public SeleniumButton(IWebElement nativeElement)
+        private readonly RemoteWebDriver driver;
+        Func<RemoteWebDriver, IWebElement> getElement;
+
+        public SeleniumButton(RemoteWebDriver driver, Func<RemoteWebDriver, IWebElement> getElement)
         {
-            this.nativeElement = nativeElement;
+            this.driver = driver;
+            this.getElement = getElement;
         }
 
         public void Click()
         {
-            nativeElement.Click();
+            var now = DateTime.Now;
+            while (DateTime.Now - now < TimeSpan.FromSeconds(5))
+            {
+
+                try
+                {
+                    var item = getElement(driver);
+                    
+                    item.Click();
+                }
+                catch (StaleElementReferenceException ignored) { }
+                catch (NoSuchElementException ignored) { }
+                catch (ElementNotVisibleException ignored) { }
+
+                break;
+            }
         }
     }
 }
