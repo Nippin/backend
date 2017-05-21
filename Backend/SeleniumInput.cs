@@ -1,10 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using OpenQA.Selenium;
 
 namespace Backend
 {
-    class SeleniumInput : IInput
+    sealed class SeleniumInput : IInput
     {
+        private readonly IWebElement linked;
+
+        public SeleniumInput(IWebElement nativeElement)
+        {
+            linked = nativeElement;
+        }
+
+        public void SetText(string value)
+        {
+            linked.SendKeys(value);
+        }
     }
 }

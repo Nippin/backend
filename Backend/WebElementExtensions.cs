@@ -12,7 +12,7 @@ namespace Backend
 
         public static IInput AsInput(this IWebElement element)
         {
-            return new SeleniumInput();
+            return new SeleniumInput(element);
         }
     }
 }

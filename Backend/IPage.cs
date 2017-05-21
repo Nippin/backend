@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using OpenQA.Selenium.Remote;
+using System.Threading.Tasks;
 
 namespace Backend
 {
     public interface IPage
     {
+        Task Initialize(RemoteWebDriver driver);
     }
 }

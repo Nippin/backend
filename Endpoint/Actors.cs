@@ -14,7 +14,9 @@ namespace Endpoint
         public void Initialize(IPipelines pipelines)
         {
             ActorSystem = ActorSystem.Create("nippin");
-            PageActor = ActorSystem.ActorOf(Props.Create<PageActor>().WithRouter(new SmallestMailboxPool(3, new DefaultResizer(1, 50), SupervisorStrategy.DefaultStrategy, null)));
+            PageActor = ActorSystem
+                .ActorOf(Props.Create<PageActor>()
+                .WithRouter(new SmallestMailboxPool(3, new DefaultResizer(1, 50), SupervisorStrategy.StoppingStrategy, null)));
         }
     }
 }

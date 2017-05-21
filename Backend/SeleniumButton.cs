@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using System;
+using OpenQA.Selenium;
 
 namespace Backend
 {
@@ -8,6 +9,11 @@ namespace Backend
         public SeleniumButton(IWebElement nativeElement)
         {
             this.nativeElement = nativeElement;
+        }
+
+        public void Click()
+        {
+            nativeElement.Click();
         }
     }
 }

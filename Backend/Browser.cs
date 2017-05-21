@@ -2,6 +2,7 @@
 using System;
 using System.Threading.Tasks;
 using OpenQA.Selenium;
+using System.Reactive.Disposables;
 
 namespace Backend
 {
@@ -12,6 +13,11 @@ namespace Backend
         /// </summary>
         private RemoteWebDriver driver;
 
+        /// <summary>
+        /// Single contener to handle all disposable subparts of the current instance.
+        /// </summary>
+        private readonly CompositeDisposable instanceDisposer = new CompositeDisposable();
+
         public Browser()
         {
         }
@@ -20,18 +26,21 @@ namespace Backend
         {
             return Task.Run(() =>
             {
-                driver = new RemoteWebDriver(new Uri("http://localhost:4444/wd/hub"), DesiredCapabilities.Chrome());
+                driver = new RemoteWebDriver(new Uri("http://localhost:4444/wd/hub"), DesiredCapabilities.Chrome())
+                        .DisposeWith(instanceDisposer);
             });
         }
 
         public void Dispose()
         {
-            driver.Dispose();
+            instanceDisposer.Dispose();
         }
 
-        public Task<TPage> Expect<TPage>() where TPage : IPage
+        public async Task<TPage> Expect<TPage>() where TPage : IPage, new()
         {
-            throw new NotImplementedException();
+            var page = new TPage();
+            await page.Initialize(driver);
+            return page;
         }
 
         public Task<Screenshot> GetScreenshot()
@@ -41,7 +50,10 @@ namespace Backend
 
         public Task GoToUrl(string url)
         {
-            throw new NotImplementedException();
+            return Task.Run(() =>
+            {
+                driver.Navigate().GoToUrl(url);
+            });
         }
     }
 }

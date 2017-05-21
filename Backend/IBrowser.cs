@@ -17,7 +17,7 @@ namespace Backend
 
         Task GoToUrl(string url);
 
-        Task<TPage> Expect<TPage>() where TPage : IPage;
+        Task<TPage> Expect<TPage>() where TPage : IPage, new();
 
         Task<Screenshot> GetScreenshot();
     }

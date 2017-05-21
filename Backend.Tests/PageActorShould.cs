@@ -5,9 +5,10 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
+using Backend;
 using static Backend.PageActor;
 
-namespace Backend
+namespace Nippin
 {
     public sealed class PageActorShould : TestKit
     {
@@ -21,20 +22,25 @@ namespace Backend
             var browser = Substitute.For<IBrowser>();
             browser.Initialize().Returns(Task.FromException(new Exception()));
 
-            var actor = ActorOfAsTestFSMRef<PageActor, States, dynamic>(() => new PageActor(() => browser));
+            var actor = ActorOfAsTestFSMRef<PageActor, States, (IActorRef, string, DateTime) >(() => new PageActor(() => browser));
             var prober = CreateTestProbe();
             prober.Watch(actor);
             prober.ExpectTerminated(actor);
 
         }
 
-        [Fact]
-        public void ReturnExpectedValue()
-        {
-        }
-
+        /// <summary>
+        /// If underlying browser can't be instaniated by any PageActor, client need to be notified 
+        /// About System error. In fact, No available browsers means system cannot proceed any message
+        /// </summary>
+        [Fact(Skip = "Not yet implemented")]
         public void ReturnTooBusyError()
         {
+            var browser = Substitute.For<IBrowser>();
+            browser.Initialize().Returns(Task.FromException(new Exception()));
+
+            var actor = ActorOfAsTestFSMRef<PageActor, States, (IActorRef, string, DateTime)>(() => new PageActor(() => browser));
+            // ??
         }
 
         [Fact]
@@ -52,11 +58,14 @@ namespace Backend
         }
 
         [Fact]
-        public async Task ShouldCheckWellKnownTaxPayer()
+        public async Task CheckWellKnownTaxPayer()
         {
             var actor = ActorOf(() => new PageActor(() => new Browser()));
-            var reply = await actor.Ask<CheckVatinReply>(new PageActor.CheckVatinAsk("5213017228", DateTime.Now), TimeSpan.FromSeconds(20)); // 521 301 72 28 - VATIN of ZUS
+
+            var reply = await actor.Ask<CheckVatinReply>(new CheckVatinAsk("5213017228", DateTime.Now), TimeSpan.FromSeconds(20)); // 521 301 72 28 - VATIN of ZUS
+
             Assert.True(reply.Done);
+            Assert.NotEmpty(reply.Screenshot);
         }
 
     }

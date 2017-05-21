@@ -1,7 +1,5 @@
 ﻿using System;
 using Akka.Actor;
-using OpenQA.Selenium.Remote;
-using OpenQA.Selenium;
 using static Backend.PageActor;
 using System.Threading.Tasks;
 
@@ -11,7 +9,7 @@ namespace Backend
     /// * Represents simple operation - check VATIN - on page ppuslugi.mf.gov.pl.
     /// * Controls lifecycle of browser instance: creates a new browser instance on start, close them on exit
     /// </summary>
-    public sealed class PageActor : FSM<States, dynamic>, IWithUnboundedStash
+    public sealed class PageActor : FSM<States, (IActorRef Requestor, string Vatin, DateTime Requested)>, IWithUnboundedStash
     {
         public enum States
         {
@@ -49,6 +47,19 @@ namespace Backend
             }
             public string Vatin { get; }
             public DateTime Now { get; }
+        }
+
+        public sealed class PageLocatingResult<TPage>
+            where TPage : IPage
+        {
+            public bool Success { get; private set; }
+            public TPage Page { get; set; }
+
+            public PageLocatingResult(bool success, TPage page)
+            {
+                Success = success;
+                Page = page;
+            }
         }
 
         /// <summary>
@@ -92,18 +103,41 @@ namespace Backend
         {
             browser = browserFactory();
 
-            base.StartWith(States.Initialized, null);
+            base.StartWith(States.Initialized, (null, null, DateTime.Now));
 
             When(States.Initialized, @event =>
             {
-                if (@event.FsmEvent is BrowserInitialized msg && msg.Success)
+                switch (@event.FsmEvent)
                 {
-                    return GoTo(States.Operational);
-                }
-                else
-                {
-                    Self.Tell(PoisonPill.Instance);
-                    return Stay();
+                    case PageLocatingResult<CheckVatinQueryPage> msg when msg.Success:
+                        // Let's restore all message fro mStash - it is safe place for client requests
+                        // which were postponed (if any exists) antil now
+                        Stash.UnstashAll();
+
+                        // now it's tim to go to Operational state where it'll be waiting for requests.
+                        return GoTo(States.Operational);
+                    case BrowserInitialized msg when msg.Success:
+                        browser
+                            .GoToUrl("https://ppuslugi.mf.gov.pl/?link=VAT")
+                            .ContinueWith(it => browser.Expect<CheckVatinQueryPage>())
+                            .Unwrap()
+                            .ContinueWith(it =>
+                            {
+                                var pageFound = it.Status == TaskStatus.RanToCompletion;
+                                var page = pageFound ? it.Result : null;
+                                return new PageLocatingResult<CheckVatinQueryPage>(pageFound, page);
+                            })
+                            .PipeTo(Self);
+
+                        return Stay();
+
+                    case PageLocatingResult<CheckVatinQueryPage> msg1 when !msg1.Success:
+                    case BrowserInitialized msg2 when !msg2.Success:
+                        Self.Tell(PoisonPill.Instance);
+                        return Stay();
+
+                    default:
+                        return null;
                 }
             });
 
@@ -114,9 +148,55 @@ namespace Backend
                     case CheckVatinAsk msg:
                         // Operational state + CheckVatinAsk starts check VATIN.
                         // Let's remember who requested the check to return them later checking result.
-                        return GoTo(States.VatinPageRequested).Using(Sender);
+                        browser
+                            .Expect<CheckVatinQueryPage>()
+                            .ContinueWith(it =>
+                            {
+                                var pageFound = it.Status == TaskStatus.RanToCompletion;
+                                var page = pageFound ? it.Result : null;
+                                return new PageLocatingResult<CheckVatinQueryPage>(pageFound, page);
+                            })
+                            .PipeTo(Self);
+
+                        return GoTo(States.VatinPageRequested).Using((Sender, msg.Vatin, msg.Now));
                     default:
+                        return null;
+                }
+            });
+
+            When(States.VatinPageRequested, @event =>
+            {
+                switch (@event.FsmEvent)
+                {
+                    case PageLocatingResult<CheckVatinQueryPage> msg when msg.Success:
+                        msg.Page.Vatin.SetText(StateData.Vatin);
+                        msg.Page.Submit.Click();
+
+                        browser.Expect<CheckVatinResultPage>()
+                            .ContinueWith(it =>
+                            {
+                                var pageFound = it.Status == TaskStatus.RanToCompletion;
+                                var page = pageFound ? it.Result : null;
+                                return new PageLocatingResult<CheckVatinResultPage>(pageFound, page);
+                            })
+                            .PipeTo(Self);
+
                         return Stay();
+                    
+                    case PageLocatingResult<CheckVatinResultPage> msg when msg.Success:
+                        var screenshot = msg.Page.Print();
+                        StateData.Requestor.Tell(new CheckVatinReply(true, screenshot));
+                        msg.Page.Clear.Click();
+                        return GoTo(States.Operational);
+
+                    case PageLocatingResult<CheckVatinResultPage> msg when !msg.Success:
+                        return GoTo(States.Operational);
+
+                    case PageLocatingResult<CheckVatinQueryPage> msg when !msg.Success:
+                        return GoTo(States.Operational);
+
+                    default:
+                        return null;
                 }
             });
 
@@ -134,13 +214,6 @@ namespace Backend
                 }
             });
 
-            OnTransition((tfrom, tto) =>
-            {
-                if (tfrom == States.Operational && tto == States.VatinPageRequested)
-                {
-                }
-            });
-
             Initialize();
         }
 
@@ -150,11 +223,6 @@ namespace Backend
                 .Initialize()
                 .ContinueWith(t => new BrowserInitialized(t.Status == TaskStatus.RanToCompletion))
                 .PipeTo(Self);
-
-            //browser
-            //    .GoToUrl("https://ppuslugi.mf.gov.pl/?link=VAT")
-            //    .ContinueWith(t => new GoToCheckkVatinPageFinished(t.IsCompleted && !t.IsFaulted))
-            //    .PipeTo(Self);
 
             base.PreStart();
         }

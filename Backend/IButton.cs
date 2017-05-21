@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Backend
+﻿namespace Backend
 {
     public interface IButton
     {
+        void Click();
     }
 }
