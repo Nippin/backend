@@ -66,7 +66,7 @@ namespace Nippin
         }
 
         [Fact]
-        public async Task ShouldReturnScreenshot()
+        public async Task ReturnScreenshot()
         {
             var bootstrapper = new DefaultNancyBootstrapper();
             var browser = new Browser(bootstrapper);

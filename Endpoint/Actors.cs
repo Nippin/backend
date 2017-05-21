@@ -15,7 +15,7 @@ namespace Endpoint
         {
             ActorSystem = ActorSystem.Create("nippin");
             PageActor = ActorSystem
-                .ActorOf(Props.Create<PageActor>()
+                .ActorOf(Props.Create(() => new PageActor(() => new Browser()))
                 .WithRouter(new SmallestMailboxPool(3, new DefaultResizer(1, 50), SupervisorStrategy.StoppingStrategy, null)));
         }
     }

@@ -6,7 +6,7 @@ using System.Reactive.Disposables;
 
 namespace Backend
 {
-    internal sealed class Browser : IBrowser
+    public sealed class Browser : IBrowser
     {
         /// <summary>
         /// Creates a new instance of Browser and connects with Selenium Hub.
