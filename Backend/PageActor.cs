@@ -170,8 +170,8 @@ namespace Backend
                 switch (@event.FsmEvent)
                 {
                     case PageLocatingResult<CheckVatinQueryPage> msg when msg.Success:
-                        msg.Page.Vatin.SetText(StateData.Vatin);
-                        msg.Page.Submit.Click();
+                        msg.Page.Vatin(StateData.Vatin);
+                        msg.Page.Submit();
 
                         browser.Expect<CheckVatinResultPage>()
                             .ContinueWith(it =>
