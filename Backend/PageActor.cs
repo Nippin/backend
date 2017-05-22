@@ -187,7 +187,7 @@ namespace Backend
                     case PageLocatingResult<CheckVatinResultPage> msg when msg.Success:
                         var screenshot = msg.Page.Print();
                         StateData.Requestor.Tell(new CheckVatinReply(true, screenshot));
-                        msg.Page.Clear.Click();
+                        msg.Page.Clear();
                         return GoTo(States.Operational);
 
                     case PageLocatingResult<CheckVatinResultPage> msg when !msg.Success:

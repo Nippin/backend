@@ -15,5 +15,10 @@ namespace Backend
         {
             return new SeleniumInput(driver, element);
         }
+
+        public static Action AsScript(this RemoteWebDriver driver, string script)
+        {
+            return () => driver.ExecuteScript(script);
+        }
     }
 }

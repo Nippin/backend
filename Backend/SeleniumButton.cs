@@ -29,7 +29,6 @@ namespace Backend
                 }
                 catch (StaleElementReferenceException ignored) { }
                 catch (NoSuchElementException ignored) { }
-                catch (ElementNotVisibleException ignored) { }
 
                 break;
             }
