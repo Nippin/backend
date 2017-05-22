@@ -8,6 +8,7 @@ namespace Endpoint
     public class Actors : IApplicationStartup
     {
         public static ActorSystem ActorSystem;
+        
         //here you would store your toplevel actor-refs
         public static IActorRef PageActor;
 

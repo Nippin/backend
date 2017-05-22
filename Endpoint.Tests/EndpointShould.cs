@@ -1,3 +1,4 @@
+using Endpoint;
 using Nancy;
 using Nancy.Testing;
 using System;
@@ -7,7 +8,7 @@ using Xunit;
 
 namespace Nippin
 {
-    public sealed class EndpointShould
+    public sealed class EndpointShould : IDisposable
     {
         [Fact]
         public async Task ReturnHomePage()
@@ -75,10 +76,15 @@ namespace Nippin
             var response = await browser.Get("/api/screenshot/5213017228", with =>
             {
                 with.HttpRequest();
-            }).WithTimeout(20);
+            }).WithTimeout(60);
 
             // Then
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        public void Dispose()
+        {
+            Actors.ActorSystem.Terminate().Wait();
         }
     }
 }
