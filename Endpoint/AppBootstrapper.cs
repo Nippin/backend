@@ -19,6 +19,8 @@ namespace Nippin
         /// Can't do that in Dispose menthod because it is not invoked
         /// so will install a handler when application is stopped 
         /// to shoutdown Actors system.
+        /// 
+        /// because we use applicationStopper token instead of disposing, use them properly in tests
         /// </summary>
         public AppBootstrapper(CancellationToken applicationStopped)
             : base()

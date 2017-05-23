@@ -2,6 +2,8 @@ using Endpoint;
 using Nancy;
 using Nancy.Testing;
 using System;
+using System.Reactive.Disposables;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -13,63 +15,76 @@ namespace Nippin
         [Fact]
         public async Task ReturnHomePage()
         {
-            // Given
-            var bootstrapper = new DefaultNancyBootstrapper();
-            var browser = new Browser(bootstrapper);
-
-            // When
-            var result = await browser.Get("/", with =>
+            var cts = new CancellationTokenSource();
+            using (Disposable.Create(() => cts.Cancel()))
+            using (var bootstrapper = new AppBootstrapper(cts.Token))
             {
-                with.HttpRequest();
-            }).WithTimeout(20);
+                var browser = new Browser(bootstrapper);
 
-            // Then
-            Assert.Equal(HttpStatusCode.OK, result.StatusCode);
+                // When
+                var result = await browser.Get("/", with =>
+                {
+                    with.HttpRequest();
+                }).WithTimeout(20);
+
+                // Then
+                Assert.Equal(HttpStatusCode.OK, result.StatusCode);
+            }
         }
 
         [Fact]
         public async Task ShouldCheckWellKnownTaxPayer()
         {
-            var bootstrapper = new DefaultNancyBootstrapper();
-            var browser = new Browser(bootstrapper);
-
-            // When
-            var response = await browser.Get("/vatin/5213017228", with =>
+            var cts = new CancellationTokenSource();
+            using (Disposable.Create(() => cts.Cancel()))
+            using (var bootstrapper = new AppBootstrapper(cts.Token))
             {
-                with.HttpRequest();
-                with.Accept(new Nancy.Responses.Negotiation.MediaRange("application/json"));
-            }).WithTimeout(20);
+                var browser = new Browser(bootstrapper);
+
+                // When
+                var response = await browser.Get("/vatin/5213017228", with =>
+                {
+                    with.HttpRequest();
+                    with.Accept(new Nancy.Responses.Negotiation.MediaRange("application/json"));
+                }).WithTimeout(20);
 
 
-            // Then
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var result = response.Body.DeserializeJson<dynamic>();
-            Assert.NotEmpty(result.Response);
+                // Then
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var result = response.Body.DeserializeJson<dynamic>();
+                Assert.NotEmpty(result.Response);
+            }
         }
 
         [Fact]
         public async Task ShouldCheckWellKnownTaxPayerDescription()
         {
-            var bootstrapper = new DefaultNancyBootstrapper();
-            var browser = new Browser(bootstrapper);
-
-            // When
-            var response = await browser.Get("/excel/5213017228/with/description", with =>
+            var cts = new CancellationTokenSource();
+            using (Disposable.Create(() => cts.Cancel()))
+            using (var bootstrapper = new AppBootstrapper(cts.Token))
             {
-                with.HttpRequest();
-                with.Accept(new Nancy.Responses.Negotiation.MediaRange("application/json"));
-            }).WithTimeout(20);
+                var browser = new Browser(bootstrapper);
 
-            // Then
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var result = response.Body.AsString();
-            Assert.NotEmpty(result);
+                // When
+                var response = await browser.Get("/excel/5213017228/with/description", with =>
+                {
+                    with.HttpRequest();
+                    with.Accept(new Nancy.Responses.Negotiation.MediaRange("application/json"));
+                }).WithTimeout(20);
+
+                // Then
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var result = response.Body.AsString();
+                Assert.NotEmpty(result);
+            }
         }
 
         [Fact]
         public async Task ReturnScreenshot()
         {
-            using (var bootstrapper = new DefaultNancyBootstrapper())
+            var cts = new CancellationTokenSource();
+            using (Disposable.Create(() => cts.Cancel()))
+            using (var bootstrapper = new AppBootstrapper(cts.Token))
             {
                 var browser = new Browser(bootstrapper);
 
