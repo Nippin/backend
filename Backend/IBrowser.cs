@@ -5,7 +5,10 @@ using System.Threading.Tasks;
 namespace Backend
 {
     /// <summary>
-    /// Represents SeleniumWebDriver instance
+    /// Represents SeleniumWebDriver instance.
+    /// 
+    /// Disposing the instance is very important because non-disposed instances will keep memory
+    /// in selenium grid and will be disposed by the grid in some time later.
     /// </summary>
     public interface IBrowser : IDisposable
     {

@@ -62,7 +62,7 @@ namespace Nippin
         {
             var actor = ActorOf(() => new PageActor(() => new Browser()));
 
-            var reply = await actor.Ask<CheckVatinReply>(new CheckVatinAsk("5213017228", DateTime.Now), TimeSpan.FromSeconds(20)); // 521 301 72 28 - VATIN of ZUS
+            var reply = await actor.Ask<CheckVatinReply>(new CheckVatinAsk("5213017228", DateTime.Now), TimeSpan.FromSeconds(60)); // 521 301 72 28 - VATIN of ZUS
 
             Assert.True(reply.Done);
             Assert.NotEmpty(reply.Screenshot);
