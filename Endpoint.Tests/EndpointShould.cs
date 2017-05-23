@@ -84,6 +84,7 @@ namespace Nippin
 
         public void Dispose()
         {
+            Actors.ActorsDisposer.Dispose();
             Actors.ActorSystem.Terminate().Wait();
         }
     }
