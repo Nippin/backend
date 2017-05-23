@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Nancy.Owin;
+using Nippin;
 
 namespace Endpoint
 {
@@ -25,7 +26,7 @@ namespace Endpoint
             Configuration = builder.Build();
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IApplicationLifetime lifetime, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
@@ -34,7 +35,7 @@ namespace Endpoint
             var appConfig = new AppConfiguration();
             ConfigurationBinder.Bind(config, appConfig);
 
-            app.UseOwin(x => x.UseNancy(opt => opt.Bootstrapper = new Bootstrapper(appConfig)));
+            app.UseOwin(x => x.UseNancy(new NancyOptions { Bootstrapper = new AppBootstrapper(lifetime.ApplicationStopped)}));
         }
     }
 }

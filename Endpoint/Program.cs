@@ -8,7 +8,8 @@ namespace Endpoint
     {
         public static void Main(string[] args)
         {
-            var host = new WebHostBuilder()
+
+            using (var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseStartup<Startup>()
@@ -16,11 +17,11 @@ namespace Endpoint
                 // Open Owin application for the internet 
                 // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel
                 .UseUrls("http://*:5000/")
-                .Build();
+                .Build())
+            {
+                host.Run();
+            }
 
-            host.Run();
-
-            Actors.ActorSystem.Terminate().Wait();
         }
     }
 }

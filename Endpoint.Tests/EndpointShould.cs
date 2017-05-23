@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Nippin
 {
-    public sealed class EndpointShould : IDisposable
+    public sealed class EndpointShould
     {
         [Fact]
         public async Task ReturnHomePage()
@@ -69,23 +69,19 @@ namespace Nippin
         [Fact]
         public async Task ReturnScreenshot()
         {
-            var bootstrapper = new DefaultNancyBootstrapper();
-            var browser = new Browser(bootstrapper);
-
-            // When
-            var response = await browser.Get("/api/screenshot/5213017228", with =>
+            using (var bootstrapper = new DefaultNancyBootstrapper())
             {
-                with.HttpRequest();
-            }).WithTimeout(60);
+                var browser = new Browser(bootstrapper);
 
-            // Then
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        }
+                // When
+                var response = await browser.Get("/api/screenshot/5213017228", with =>
+                {
+                    with.HttpRequest();
+                }).WithTimeout(60);
 
-        public void Dispose()
-        {
-            Actors.ActorsDisposer.Dispose();
-            Actors.ActorSystem.Terminate().Wait();
+                // Then
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
         }
     }
 }
