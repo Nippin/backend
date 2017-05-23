@@ -53,7 +53,7 @@ namespace Nippin
             AwaitCondition(() => client.GetSessionsAsync().Result.value?.Count == sessionCount + 1);
 
             Sys.Stop(actor);
-            AwaitCondition(() => client.GetSessionsAsync().Result.value?.Count == sessionCount, TimeSpan.FromSeconds(20));
+            AwaitCondition(() => client.GetSessionsAsync().Result.value?.Count == sessionCount, TimeSpan.FromSeconds(60));
             Assert.Equal(sessionCount, client.GetSessionsAsync().Result.value?.Count);
         }
 
