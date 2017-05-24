@@ -14,20 +14,24 @@ namespace Backend
         public enum States
         {
             /// <summary>
-            /// Initial state of the Actor.
+            /// Initial state of the Actor. 
+            /// 
+            /// Actor need to initialize connection with Browser to continue work.
             /// </summary>
             Initialized,
 
             /// <summary>
             /// Linked browser (managed by the agent) is ready for use.
-            /// Actor is ready for <see cref="VatinPageRequested"/>
+            /// Actor is ready for <see cref="Working"/>
             /// </summary>
             Operational,
 
             /// <summary>
-            /// Someone requested to keed to check VATIN number.
+            /// Someone requested to check VATIN number, operation in progress.
+            /// 
+            /// When finished, Actor will go back to <see cref="Operational"/> state.
             /// </summary>
-            VatinPageRequested
+            Working
         }
 
 
@@ -159,13 +163,13 @@ namespace Backend
                             })
                             .PipeTo(Self);
 
-                        return GoTo(States.VatinPageRequested).Using((Sender, msg.Vatin, msg.Now));
+                        return GoTo(States.Working).Using((Sender, msg.Vatin, msg.Now));
                     default:
                         return null;
                 }
             });
 
-            When(States.VatinPageRequested, @event =>
+            When(States.Working, @event =>
             {
                 switch (@event.FsmEvent)
                 {
