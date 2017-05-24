@@ -13,6 +13,7 @@ namespace Nippin
     public sealed class AppBootstrapper : DefaultNancyBootstrapper
     {
         private CompositeDisposable instanceDisposer = new CompositeDisposable();
+        private readonly int minNumberOfBrowsers, maxNumberOfBrowsers;
 
         /// <summary>
         /// We need to release Actor system because it keeps opened browsers.
@@ -22,9 +23,13 @@ namespace Nippin
         /// 
         /// because we use applicationStopper token instead of disposing, use them properly in tests
         /// </summary>
-        public AppBootstrapper(CancellationToken applicationStopped)
+        public AppBootstrapper(CancellationToken applicationStopped, int minNumberOfBrowsers, int maxNumberOfBrowsers)
             : base()
         {
+
+            this.minNumberOfBrowsers = minNumberOfBrowsers;
+            this.maxNumberOfBrowsers = maxNumberOfBrowsers;
+
             applicationStopped.Register(() =>
             {
                 instanceDisposer.Dispose();
@@ -35,12 +40,14 @@ namespace Nippin
         {
             var actorSystem = ActorSystem.Create("nippin");
 
-            // PageActors need to close browsers, so it is expensive so let allow them to finish it in long time window (30s);
+            // Every PageActors is linked with a remote browser.
+            // Closing a browser could be an expensive timely operation so 
+            // let allow them to finish closing all browsers in a quite long time window (30s);
             Disposable.Create(() => actorSystem.Terminate().Wait(new CancellationTokenSource(30 * 1000).Token)).DisposeWith(instanceDisposer);
 
             var pageActor = actorSystem
                 .ActorOf(Props.Create(() => new PageActor(() => new Browser()))
-                .WithRouter(new SmallestMailboxPool(10, new DefaultResizer(5, 50), SupervisorStrategy.StoppingStrategy, null)));
+                .WithRouter(new SmallestMailboxPool(minNumberOfBrowsers, new DefaultResizer(minNumberOfBrowsers, maxNumberOfBrowsers), SupervisorStrategy.StoppingStrategy, null)));
             container.Register(pageActor);
 
             base.ApplicationStartup(container, pipelines);
