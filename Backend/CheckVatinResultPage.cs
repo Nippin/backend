@@ -35,13 +35,33 @@ namespace Backend
                 // run script located @ Clear button CLick event directly
                 // because trying to click Clear button directly was very tiought
                 // - clicking resulted with some Selenium exceptions.
-                Clear = () => driver.AsScript("FWDC.eventOccurred(event, 'b-9');");
+                Clear = OnClear;
             });
         }
 
         public string Print()
         {
             return driver.GetScreenshot().AsBase64EncodedString;
+        }
+
+        private void OnClear()
+        {
+            var element = default(IWebElement);
+            var now = DateTime.Now;
+            while (DateTime.Now - now < TimeSpan.FromSeconds(10))
+            {
+                // try to recognize page base on string: Data sprawdzenia:
+                var found = driver.FindElements(By.Id("b-9")).FirstOrDefault();
+                if (found == null) continue;
+                if (!found.Displayed) continue;
+
+                element = found;
+                break;
+            }
+
+            if (element == null) throw new NoSuchElementException();
+
+            element.Click();
         }
     }
 }
