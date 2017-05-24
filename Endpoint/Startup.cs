@@ -35,7 +35,7 @@ namespace Endpoint
             var appConfig = new AppConfiguration();
             ConfigurationBinder.Bind(config, appConfig);
 
-            app.UseOwin(x => x.UseNancy(new NancyOptions { Bootstrapper = new AppBootstrapper(lifetime.ApplicationStopped, 10, 50)}));
+            app.UseOwin(x => x.UseNancy(new NancyOptions { Bootstrapper = new AppBootstrapper(lifetime.ApplicationStopped, 1, 1)}));
         }
     }
 }

@@ -46,22 +46,31 @@ namespace Backend
 
         private void OnClear()
         {
-            var element = default(IWebElement);
-            var now = DateTime.Now;
-            while (DateTime.Now - now < TimeSpan.FromSeconds(10))
+            repeat:
+            try
             {
-                // try to recognize page base on string: Data sprawdzenia:
-                var found = driver.FindElements(By.Id("b-9")).FirstOrDefault();
-                if (found == null) continue;
-                if (!found.Displayed) continue;
+                var element = default(IWebElement);
+                var now = DateTime.Now;
+                while (DateTime.Now - now < TimeSpan.FromSeconds(10))
+                {
+                    // try to recognize page base on string: Data sprawdzenia:
+                    var found = driver.FindElements(By.Id("b-9")).FirstOrDefault();
+                    if (found == null) continue;
+                    if (!found.Displayed) continue;
 
-                element = found;
-                break;
+                    element = found;
+                    break;
+                }
+
+                if (element == null) throw new NoSuchElementException();
+
+                element.Click();
+            }
+            catch (StaleElementReferenceException repeat)
+            {
+                goto repeat;
             }
 
-            if (element == null) throw new NoSuchElementException();
-
-            element.Click();
         }
     }
 }
