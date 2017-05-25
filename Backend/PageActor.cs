@@ -2,6 +2,8 @@
 using Akka.Actor;
 using static Backend.PageActor;
 using System.Threading.Tasks;
+using System.Threading;
+using Nippin;
 
 namespace Backend
 {
@@ -116,7 +118,7 @@ namespace Backend
                     case BrowserInitialized msg when msg.Success:
                         browser
                             .GoToUrl("https://ppuslugi.mf.gov.pl/?link=VAT")
-                            .ContinueWith(it => browser.Expect<CheckVatinQueryPage>())
+                            .ContinueWith(it => browser.Expect<CheckVatinQueryPage>(new CancellationTokenSource(30.Seconds()).Token))
                             .Unwrap()
                             .ContinueWith(it =>
                             {
@@ -154,7 +156,7 @@ namespace Backend
                         // Operational state + CheckVatinAsk starts check VATIN.
                         // Let's remember who requested the check to return them later checking result.
                         browser
-                            .Expect<CheckVatinQueryPage>()
+                            .Expect<CheckVatinQueryPage>(new CancellationTokenSource(30.Seconds()).Token)
                             .ContinueWith(it =>
                             {
                                 var pageFound = it.Status == TaskStatus.RanToCompletion;
@@ -177,7 +179,7 @@ namespace Backend
                         msg.Page.Vatin(StateData.Vatin);
                         msg.Page.Submit();
 
-                        browser.Expect<CheckVatinResultPage>()
+                        browser.Expect<CheckVatinResultPage>(new CancellationTokenSource(30.Seconds()).Token)
                             .ContinueWith(it =>
                             {
                                 var pageFound = it.Status == TaskStatus.RanToCompletion;

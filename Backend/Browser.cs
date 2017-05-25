@@ -3,6 +3,7 @@ using System;
 using System.Threading.Tasks;
 using OpenQA.Selenium;
 using System.Reactive.Disposables;
+using System.Threading;
 
 namespace Backend
 {
@@ -35,11 +36,32 @@ namespace Backend
             instanceDisposer.Dispose();
         }
 
-        public async Task<TPage> Expect<TPage>() where TPage : IPage, new()
+        public Task<TPage> Expect<TPage>(CancellationToken deadline) where TPage : IPage, new()
         {
             var page = new TPage();
-            await page.Initialize(driver);
-            return page;
+            var result = new TaskCompletionSource<TPage>();
+
+            page.Initialize(driver);
+
+            page
+                .Identified(deadline)
+                .ContinueWith(t =>
+                {
+                    switch (t.Status)
+                    {
+                        case TaskStatus.RanToCompletion:
+                            result.SetResult(page);
+                            break;
+                        case TaskStatus.Faulted:
+                            result.SetException(t.Exception);
+                            break;
+                        default:
+                            result.SetCanceled();
+                            break;
+                    }
+                });
+
+            return result.Task;
         }
 
         public Task<Screenshot> GetScreenshot()

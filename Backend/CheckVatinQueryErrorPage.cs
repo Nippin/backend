@@ -7,7 +7,12 @@ using System.Threading;
 
 namespace Backend
 {
-    public sealed class CheckVatinQueryPage : IPage
+    /// <summary>
+    /// Some VATIN numbers are invalid - e.g. 1111111112
+    /// 
+    /// In that case page navigates from CheckVatinQueryPage to CheckVatinQueryErrorPage.
+    /// </summary>
+    public sealed class CheckVatinQueryErrorPage : IPage
     {
         public Action Submit { get; private set; }
         public Action<string> Vatin { get; private set; }

@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Backend
@@ -20,7 +21,7 @@ namespace Backend
 
         Task GoToUrl(string url);
 
-        Task<TPage> Expect<TPage>() where TPage : IPage, new();
+        Task<TPage> Expect<TPage>(CancellationToken deadline) where TPage : IPage, new();
 
         Task<Screenshot> GetScreenshot();
     }
