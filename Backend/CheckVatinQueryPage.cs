@@ -30,12 +30,31 @@ namespace Backend
             while (DateTime.Now - now < TimeSpan.FromSeconds(10))
             {
                 element = driver.FindElements(By.Id("b-8")).FirstOrDefault();
-                if (element != null) break;
+
+                if (element == null) continue;
             }
 
             if (element == null) throw new NoSuchElementException();
 
-            element.Click();
+            // variable 'element' represents button titled 'Sprawdź' used for submit data.
+            // But clicking the element sometimes work, sometimes not and I can't understand how
+            // 
+            // we need reliable functionality we will click the baton as long as will be 
+            // ,arked as 'stale' so to stabilize application to have always working *submit* functionality.
+            // The solution is trying to click them as long as the element is available on the screen
+            try
+            {
+                do
+                {
+                    element.Click();
+
+                    // in fact we don't need it selected, but it is known property
+                    // wchich throws StaleElementReferenceException when element is not yet on the browser DOM model.
+                } while (!element.Selected);
+            } catch (StaleElementReferenceException)
+            {
+
+            }
         }
 
         private void OnVatin(string value)
