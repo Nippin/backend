@@ -87,11 +87,6 @@ namespace Backend
 
         public sealed class BrowserInitialized
         {
-            public bool Success { get; private set; }
-            public BrowserInitialized(bool success)
-            {
-                Success = success;
-            }
         }
 
         public sealed class GoToCheckkVatinPageFinished
@@ -115,7 +110,7 @@ namespace Backend
             {
                 switch (@event.FsmEvent)
                 {
-                    case BrowserInitialized msg when msg.Success:
+                    case BrowserInitialized msg:
                         browser
                             .GoToUrl("https://ppuslugi.mf.gov.pl/?link=VAT")
                             .ContinueWith(it => browser.Expect<CheckVatinQueryPage>(new CancellationTokenSource(30.Seconds()).Token))
@@ -139,9 +134,6 @@ namespace Backend
                         return GoTo(States.Operational);
 
                     case PageLocatingResult<CheckVatinQueryPage> msg1 when !msg1.Success:
-                    case BrowserInitialized msg2 when !msg2.Success:
-                        Self.Tell(PoisonPill.Instance);
-                        return Stay();
 
                     default:
                         return null;
@@ -226,10 +218,9 @@ namespace Backend
 
         protected override void PreStart()
         {
-            browser
-                .Initialize()
-                .ContinueWith(t => new BrowserInitialized(t.Status == TaskStatus.RanToCompletion))
-                .PipeTo(Self);
+            browser.Initialize();
+
+            Self.Tell(new BrowserInitialized());
 
             base.PreStart();
         }

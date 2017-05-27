@@ -23,12 +23,10 @@ namespace Backend
         {
         }
 
-        public Task Initialize()
+        public void Initialize()
         {
             driver = new RemoteWebDriver(new Uri("http://localhost:4444/wd/hub"), DesiredCapabilities.Chrome())
                     .DisposeWith(instanceDisposer);
-
-            return Task.CompletedTask;
         }
 
         public void Dispose()

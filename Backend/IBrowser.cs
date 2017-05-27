@@ -17,7 +17,7 @@ namespace Backend
         /// Need to be invoked once to start browser's work.
         /// </summary>
         /// <returns></returns>
-        Task Initialize();
+        void Initialize();
 
         Task GoToUrl(string url);
 

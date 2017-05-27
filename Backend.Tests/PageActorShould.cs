@@ -20,7 +20,8 @@ namespace Nippin
         public void FailWhenCantConnectToBrowser()
         {
             var browser = Substitute.For<IBrowser>();
-            browser.Initialize().Returns(Task.FromException(new Exception()));
+            browser.When(b =>  b.Initialize())
+                .Throw(new Exception());
 
             var actor = ActorOfAsTestFSMRef<PageActor, States, (IActorRef, string, DateTime) >(() => new PageActor(() => browser));
             var prober = CreateTestProbe();
@@ -37,7 +38,8 @@ namespace Nippin
         public void ReturnTooBusyError()
         {
             var browser = Substitute.For<IBrowser>();
-            browser.Initialize().Returns(Task.FromException(new Exception()));
+            browser.When(b => b.Initialize())
+                .Throw(new Exception());
 
             var actor = ActorOfAsTestFSMRef<PageActor, States, (IActorRef, string, DateTime)>(() => new PageActor(() => browser));
             // ??
