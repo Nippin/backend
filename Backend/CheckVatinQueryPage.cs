@@ -23,7 +23,41 @@ namespace Backend
 
         public Task Identified(CancellationToken deadline)
         {
-            throw new NotImplementedException();
+            var tcs = new TaskCompletionSource<object>();
+
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    if (deadline.IsCancellationRequested)
+                    {
+                        tcs.SetCanceled();
+                        return;
+                    }
+
+                    await Task.Delay(100);
+
+                    {
+                        // button 'Sprawdź' need to be visible
+                        var element = driver.FindElements(By.Id("b-8")).FirstOrDefault();
+                        if (element == null) continue;
+                        if (!element.Displayed) continue;
+                        if (element.Text != "Sprawdź") continue;
+                    }
+
+                    {
+                        // button 'Wyczyść' need to be hidden
+                        var element = driver.FindElements(By.Id("b-9")).FirstOrDefault();
+                        if (element == null) continue;
+                        if (element.Displayed) continue;
+                    }
+
+                    tcs.SetResult(null);
+                    return;
+                }
+            });
+
+            return tcs.Task;
         }
 
         private void OnSubmit()
@@ -36,29 +70,13 @@ namespace Backend
                 element = driver.FindElements(By.Id("b-8")).FirstOrDefault();
 
                 if (element == null) continue;
+
+                break;
             }
 
             if (element == null) throw new NoSuchElementException();
 
-            // variable 'element' represents button titled 'Sprawdź' used for submit data.
-            // But clicking the element sometimes work, sometimes not and I can't understand how
-            // 
-            // we need reliable functionality we will click the baton as long as will be 
-            // ,arked as 'stale' so to stabilize application to have always working *submit* functionality.
-            // The solution is trying to click them as long as the element is available on the screen
-            try
-            {
-                do
-                {
-                    element.Click();
-
-                    // in fact we don't need it selected, but it is known property
-                    // wchich throws StaleElementReferenceException when element is not yet on the browser DOM model.
-                } while (!element.Selected);
-            } catch (StaleElementReferenceException)
-            {
-
-            }
+            element.Click();
         }
 
         private void OnVatin(string value)

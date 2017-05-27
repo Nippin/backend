@@ -51,7 +51,6 @@ namespace Backend
                     }
 
                     {
-                        // button 'Wyczyść'
                         var element = driver.FindElements(By.Id("caption2_b-b")).FirstOrDefault();
                         if (element == null) continue;
                         if (!element.Displayed) continue;

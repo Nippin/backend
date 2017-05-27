@@ -47,7 +47,7 @@ namespace Nippin
 
             var pageActor = actorSystem
                 .ActorOf(Props.Create(() => new PageActor(() => new Browser()))
-                .WithRouter(new SmallestMailboxPool(minNumberOfBrowsers, new DefaultResizer(minNumberOfBrowsers, maxNumberOfBrowsers), SupervisorStrategy.StoppingStrategy, null)));
+                .WithRouter(new SmallestMailboxPool(minNumberOfBrowsers, new DefaultResizer(minNumberOfBrowsers, maxNumberOfBrowsers), SupervisorStrategy.DefaultStrategy, null)));
             container.Register(pageActor);
 
             base.ApplicationStartup(container, pipelines);
