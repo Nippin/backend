@@ -11,9 +11,8 @@ namespace Endpoint
     public sealed class ScreenshotModule : NancyModule
     {
         public ScreenshotModule(IActorRef pageActor)
-            : base("/api/screenshot")
         {
-            Get("{id}", async (_) =>
+            Get("/api/screenshot/{id}", async (_) =>
             {
                 var id = (string)_.id;
                 var response = await pageActor.Ask<PageActor.CheckVatinReply>(new PageActor.CheckVatinAsk(id, DateTime.Now));
