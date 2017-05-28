@@ -19,7 +19,10 @@ namespace Endpoint
                     Console.WriteLine("Dupa1");
                     var id = (string)_.id;
                     var response = await pageActor.Ask<PageActor.CheckVatinReply>(new PageActor.CheckVatinAsk(id, DateTime.Now));
+                    Console.WriteLine("Dupa2");
                     if (!response.Done) return HttpStatusCode.BadGateway;
+
+                    Console.WriteLine("Dupa3");
 
                     var screenshot = new Screenshot(response.Screenshot);
 
@@ -27,13 +30,18 @@ namespace Endpoint
                     var fileName = Path.GetTempFileName();
                     screenshot.SaveAsFile(fileName, ScreenshotImageFormat.Png);
 
+                    Console.WriteLine("Dupa4");
+
                     // https://blog.kulman.sk/returning-files-in-nancyfx/
                     var result = new StreamResponse(() => new RemovebleFileStream(fileName), "image/png");
+
+                    Console.WriteLine("Dupa5");
+
                     return result.AsAttachment($"{id} {DateTime.Now:yyyy-MM-dd}.png");
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Dupa2");
+                    Console.WriteLine("DupaException");
                     Console.WriteLine(e);
                     return HttpStatusCode.Conflict;
                 }
