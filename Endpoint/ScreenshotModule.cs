@@ -14,19 +14,29 @@ namespace Endpoint
         {
             Get("/api/screenshot/{id}", async (_) =>
             {
-                var id = (string)_.id;
-                var response = await pageActor.Ask<PageActor.CheckVatinReply>(new PageActor.CheckVatinAsk(id, DateTime.Now));
-                if (!response.Done) return HttpStatusCode.BadGateway;
+                try
+                {
+                    Console.WriteLine("Dupa1");
+                    var id = (string)_.id;
+                    var response = await pageActor.Ask<PageActor.CheckVatinReply>(new PageActor.CheckVatinAsk(id, DateTime.Now));
+                    if (!response.Done) return HttpStatusCode.BadGateway;
 
-                var screenshot = new Screenshot(response.Screenshot);
+                    var screenshot = new Screenshot(response.Screenshot);
 
-                // to convert Selenium screenshot to a file, we need temporarly use file
-                var fileName = Path.GetTempFileName();
-                screenshot.SaveAsFile(fileName, ScreenshotImageFormat.Png);
+                    // to convert Selenium screenshot to a file, we need temporarly use file
+                    var fileName = Path.GetTempFileName();
+                    screenshot.SaveAsFile(fileName, ScreenshotImageFormat.Png);
 
-                // https://blog.kulman.sk/returning-files-in-nancyfx/
-                var result = new StreamResponse(() => new RemovebleFileStream(fileName), "image/png");
-                return result.AsAttachment($"{id} {DateTime.Now:yyyy-MM-dd}.png");
+                    // https://blog.kulman.sk/returning-files-in-nancyfx/
+                    var result = new StreamResponse(() => new RemovebleFileStream(fileName), "image/png");
+                    return result.AsAttachment($"{id} {DateTime.Now:yyyy-MM-dd}.png");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Dupa2");
+                    Console.WriteLine(e);
+                    return HttpStatusCode.Conflict;
+                }
             });
         }
     }
