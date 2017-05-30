@@ -17,7 +17,7 @@ namespace Nippin
         {
             var cts = new CancellationTokenSource();
             using (Disposable.Create(() => cts.Cancel()))
-            using (var bootstrapper = new AppBootstrapper(cts.Token, 1, 1))
+            using (var bootstrapper = new AppBootstrapper(new SeleniumOptions { SeleniumGridAddress = "http://localhost:4444/" }, cts.Token, 1, 1))
             {
                 var browser = new Browser(bootstrapper);
 
@@ -37,7 +37,7 @@ namespace Nippin
         {
             var cts = new CancellationTokenSource();
             using (Disposable.Create(() => cts.Cancel()))
-            using (var bootstrapper = new AppBootstrapper(cts.Token, 1, 1))
+            using (var bootstrapper = new AppBootstrapper(new SeleniumOptions { SeleniumGridAddress = "http://localhost:4444/" }, cts.Token, 1, 1))
             {
                 var browser = new Browser(bootstrapper);
 
@@ -61,7 +61,7 @@ namespace Nippin
         {
             var cts = new CancellationTokenSource();
             using (Disposable.Create(() => cts.Cancel()))
-            using (var bootstrapper = new AppBootstrapper(cts.Token, 1, 1))
+            using (var bootstrapper = new AppBootstrapper(new SeleniumOptions { SeleniumGridAddress = "http://localhost:4444/" }, cts.Token, 1, 1))
             {
                 var browser = new Browser(bootstrapper);
 
@@ -84,7 +84,7 @@ namespace Nippin
         {
             var cts = new CancellationTokenSource();
             using (Disposable.Create(() => cts.Cancel()))
-            using (var bootstrapper = new AppBootstrapper(cts.Token, 1, 1))
+            using (var bootstrapper = new AppBootstrapper(new SeleniumOptions { SeleniumGridAddress = "http://localhost:4444/" } , cts.Token, 1, 1))
             {
                 var browser = new Browser(bootstrapper);
 

@@ -7,6 +7,8 @@ using Nancy.TinyIoc;
 using System.Reactive.Disposables;
 using Nancy.Configuration;
 using System.Threading;
+using static Endpoint.Startup;
+using Microsoft.Extensions.Options;
 
 namespace Nippin
 {
@@ -14,6 +16,7 @@ namespace Nippin
     {
         private CompositeDisposable instanceDisposer = new CompositeDisposable();
         private readonly int minNumberOfBrowsers, maxNumberOfBrowsers;
+        private readonly SeleniumOptions options;
 
         /// <summary>
         /// We need to release Actor system because it keeps opened browsers.
@@ -23,10 +26,11 @@ namespace Nippin
         /// 
         /// because we use applicationStopper token instead of disposing, use them properly in tests
         /// </summary>
-        public AppBootstrapper(CancellationToken applicationStopped, int minNumberOfBrowsers, int maxNumberOfBrowsers)
+        public AppBootstrapper(SeleniumOptions options, CancellationToken applicationStopped, int minNumberOfBrowsers, int maxNumberOfBrowsers)
             : base()
         {
 
+            this.options = options;
             this.minNumberOfBrowsers = minNumberOfBrowsers;
             this.maxNumberOfBrowsers = maxNumberOfBrowsers;
 
@@ -46,7 +50,7 @@ namespace Nippin
             Disposable.Create(() => actorSystem.Terminate().Wait(new CancellationTokenSource(30 * 1000).Token)).DisposeWith(instanceDisposer);
 
             var pageActor = actorSystem
-                .ActorOf(Props.Create(() => new PageActor(() => new Browser()))
+                .ActorOf(Props.Create(() => new PageActor(() => new Browser(options)))
                 .WithRouter(new SmallestMailboxPool(minNumberOfBrowsers, new DefaultResizer(minNumberOfBrowsers, maxNumberOfBrowsers), SupervisorStrategy.DefaultStrategy, null)));
             container.Register(pageActor);
 

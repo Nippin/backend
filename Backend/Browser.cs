@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using OpenQA.Selenium;
 using System.Reactive.Disposables;
 using System.Threading;
+using Nippin;
 
 namespace Backend
 {
@@ -19,13 +20,16 @@ namespace Backend
         /// </summary>
         private readonly CompositeDisposable instanceDisposer = new CompositeDisposable();
 
-        public Browser()
+        private SeleniumOptions options;
+
+        public Browser(SeleniumOptions options)
         {
+            this.options = options;
         }
 
         public void Initialize()
         {
-            driver = new RemoteWebDriver(new Uri("http://localhost:4444/wd/hub"), DesiredCapabilities.Chrome())
+            driver = new RemoteWebDriver(new Uri($"{options.SeleniumGridAddress}wd/hub"), DesiredCapabilities.Chrome())
                     .DisposeWith(instanceDisposer);
         }
 

@@ -51,7 +51,7 @@ namespace Nippin
             var client = new HttpClient();
             var sessionCount = (await client.GetSessionsAsync()).value?.Count;
 
-            var actor = ActorOf(() => new PageActor(() => new Browser()));
+            var actor = ActorOf(() => new PageActor(() => new Browser(new SeleniumOptions { SeleniumGridAddress = "http://localhost:4444/" })));
             AwaitCondition(() => client.GetSessionsAsync().Result.value?.Count == sessionCount + 1);
 
             Sys.Stop(actor);
@@ -62,7 +62,7 @@ namespace Nippin
         [Fact]
         public async Task CheckWellKnownTaxPayer()
         {
-            var actor = ActorOf(() => new PageActor(() => new Browser()));
+            var actor = ActorOf(() => new PageActor(() => new Browser(new SeleniumOptions { SeleniumGridAddress = "http://localhost:4444/" })));
 
             var reply = await actor.Ask<CheckVatinReply>(new CheckVatinAsk("5213017228", DateTime.Now), TimeSpan.FromSeconds(60)); // 521 301 72 28 - VATIN of ZUS
 
