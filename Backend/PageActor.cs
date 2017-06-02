@@ -85,6 +85,9 @@ namespace Backend
             public string Screenshot { get; set; }
         }
 
+        /// <summary>
+        /// Indicates the underlying browser is ready to work.
+        /// </summary>
         public sealed class BrowserInitialized
         {
         }
@@ -98,6 +101,9 @@ namespace Backend
             public bool Success { get; private set; }
         }
 
+        /// <summary>
+        /// Web browser managed byt the current actor instance.
+        /// </summary>
         private IBrowser browser;
 
         public PageActor(Func<IBrowser> browserFactory)
