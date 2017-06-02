@@ -33,7 +33,7 @@ namespace Backend
             {
                 var url = $"{options.SeleniumGridAddress}wd/hub";
                 Console.WriteLine("Initialize driver... Start with url:" + $"{options.SeleniumGridAddress}wd/hub");
-                driver = new RemoteWebDriver(new Uri(), DesiredCapabilities.Chrome())
+                driver = new RemoteWebDriver(new Uri(url), DesiredCapabilities.Chrome())
                         .DisposeWith(instanceDisposer);
                 Console.WriteLine("Initialize driver...End");
             }
