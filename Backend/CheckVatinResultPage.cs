@@ -41,22 +41,80 @@ namespace Backend
                         return;
                     }
 
-                    await Task.Delay(100);
-
+                    try
                     {
-                        // button 'Wyczyść'
-                        var element = driver.FindElements(By.Id("b-9")).FirstOrDefault();
-                        if (element == null) continue;
-                        if (!element.Displayed) continue;
+                        int tries = 10;
+                        while (true)
+                        {
+                            await Task.Delay(1000);
+
+                            try
+                            {
+                                // button 'Wyczyść'
+                                var element = driver.FindElements(By.Id("b-9")).FirstOrDefault();
+                                if (element == null)
+                                {
+                                    tries--;
+                                    if (tries > 0) continue;
+
+                                    tcs.SetException(new InvalidOperationException("b-9 button doesn't exist"));
+                                    return;
+                                }
+
+                                if (!element.Displayed)
+                                {
+                                    tcs.SetException(new InvalidOperationException("b-9 button is invisible"));
+                                    return;
+                                }
+
+                                break;
+                            }
+                            catch (StaleElementReferenceException)
+                            {
+                                if (tries-- > 0) continue;
+                                else throw;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        tcs.SetException(ex);
+                        return;
                     }
 
+
+
+
+                    try
                     {
-                        var element = driver.FindElements(By.Id("caption2_b-b")).FirstOrDefault();
-                        if (element == null) continue;
-                        if (!element.Displayed) continue;
-                        var content = element.Text;
-                        if (!content.StartsWith("Data sprawdzenia:")) continue;
+                        int tries = 10;
+                        while (true)
+                        {
+                            await Task.Delay(1000);
+
+                            try
+                            {
+                                var element = driver.FindElements(By.Id("caption2_b-b")).FirstOrDefault();
+                                if (element == null) continue;
+                                if (!element.Displayed) continue;
+                                var content = element.Text;
+                                if (!content.StartsWith("Data sprawdzenia:")) continue;
+
+                                break;
+                            }
+                            catch (StaleElementReferenceException)
+                            {
+                                if (tries-- > 0) continue;
+                                else throw;
+                            }
+                        }
                     }
+                    catch (Exception ex)
+                    {
+                        tcs.SetException(ex);
+                        return;
+                    }
+
 
                     tcs.SetResult(null);
                     return;

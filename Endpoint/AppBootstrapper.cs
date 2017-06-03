@@ -7,8 +7,6 @@ using Nancy.TinyIoc;
 using System.Reactive.Disposables;
 using Nancy.Configuration;
 using System.Threading;
-using static Endpoint.Startup;
-using Microsoft.Extensions.Options;
 
 namespace Nippin
 {
@@ -51,7 +49,7 @@ namespace Nippin
 
             var pageActor = actorSystem
                 .ActorOf(Props.Create(() => new PageActor(() => new Browser(options)))
-                .WithRouter(new SmallestMailboxPool(minNumberOfBrowsers, new DefaultResizer(minNumberOfBrowsers, maxNumberOfBrowsers), SupervisorStrategy.DefaultStrategy, null)));
+                .WithRouter(new RoundRobinPool(minNumberOfBrowsers, new DefaultResizer(minNumberOfBrowsers, maxNumberOfBrowsers), SupervisorStrategy.DefaultStrategy, null)));
             container.Register(pageActor);
 
             base.ApplicationStartup(container, pipelines);
@@ -64,3 +62,4 @@ namespace Nippin
         }
     }
 }
+

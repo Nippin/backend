@@ -4,6 +4,7 @@ using static Backend.PageActor;
 using System.Threading.Tasks;
 using System.Threading;
 using Nippin;
+using Akka.Event;
 
 namespace Backend
 {
@@ -13,12 +14,15 @@ namespace Backend
     /// </summary>
     public sealed class PageActor : FSM<States, (IActorRef Requestor, string Vatin, DateTime Requested)>, IWithUnboundedStash
     {
+        private readonly ILoggingAdapter log = Logging.GetLogger(Context);
+
         public enum States
         {
             /// <summary>
             /// Initial state of the Actor. 
             /// 
-            /// Actor need to initialize connection with Browser to continue work.
+            /// Actor need to initialize connection with Browser to continue work. 
+            /// Alternative is suicide because Browser is essential for PageActor.
             /// </summary>
             Initialized,
 
@@ -33,7 +37,7 @@ namespace Backend
             /// 
             /// When finished, Actor will go back to <see cref="Operational"/> state.
             /// </summary>
-            Working
+            Working,
         }
 
 
@@ -92,6 +96,10 @@ namespace Backend
         {
         }
 
+        public sealed class ConsumeNext
+        {
+        }
+
         public sealed class GoToCheckkVatinPageFinished
         {
             public GoToCheckkVatinPageFinished(bool success)
@@ -132,7 +140,7 @@ namespace Backend
                         return Stay();
 
                     case PageLocatingResult<CheckVatinQueryPage> msg when msg.Success:
-                        // Let's restore all message fro mStash - it is safe place for client requests
+                        // Let's restore all message from Stash - it is safe place for client requests
                         // which were postponed (if any exists) antil now
                         Stash.UnstashAll();
 
@@ -140,6 +148,11 @@ namespace Backend
                         return GoTo(States.Operational);
 
                     case PageLocatingResult<CheckVatinQueryPage> msg1 when !msg1.Success:
+                        // We can't open CheckVatinQueryPage so the browser is useless.
+                        // The simplest scenario is to kill the actor and 
+                        // assume the instance will be replaced with a new instance.
+                        // so the first - suicide
+                        throw new InvalidOperationException();
 
                     default:
                         return null;
@@ -159,11 +172,25 @@ namespace Backend
                             {
                                 var pageFound = it.Status == TaskStatus.RanToCompletion;
                                 var page = pageFound ? it.Result : null;
+                                log.Info($"Page <CheckVatinQueryPage> found: {pageFound}");
+                                if (it.IsFaulted)
+                                {
+                                    log.Info($"Page <CheckVatinQueryPage> exception: {it.Exception.Flatten()}");
+                                }
                                 return new PageLocatingResult<CheckVatinQueryPage>(pageFound, page);
                             })
                             .PipeTo(Self);
 
                         return GoTo(States.Working).Using((Sender, msg.Vatin, msg.Now));
+
+                    case ConsumeNext msg:
+                        // Let's restore all message from Stash - it is safe place for client requests
+                        // which were postponed (if any exists) antil now
+                        Stash.UnstashAll();
+
+                        // now it's tim to go to Operational state where it'll be waiting for requests.
+                        return GoTo(States.Operational);
+
                     default:
                         return null;
                 }
@@ -177,21 +204,32 @@ namespace Backend
                         msg.Page.Vatin(StateData.Vatin);
                         msg.Page.Submit();
 
+                        log.Info("Expect <CheckVatinResultPage> ...");
                         browser.Expect<CheckVatinResultPage>(new CancellationTokenSource(30.Seconds()).Token)
                             .ContinueWith(it =>
                             {
                                 var pageFound = it.Status == TaskStatus.RanToCompletion;
                                 var page = pageFound ? it.Result : null;
+                                log.Info($"Page <CheckVatinResultPage> found: {pageFound}");
+                                if (it.IsFaulted)
+                                {
+                                    log.Info($"Page <CheckVatinResultPage> exception: {it.Exception.Flatten()}");
+                                }
                                 return new PageLocatingResult<CheckVatinResultPage>(pageFound, page);
                             })
                             .PipeTo(Self);
 
                         return Stay();
-                    
+
                     case PageLocatingResult<CheckVatinResultPage> msg when msg.Success:
                         var screenshot = msg.Page.Print();
                         StateData.Requestor.Tell(new CheckVatinReply(true, screenshot));
                         msg.Page.Clear();
+
+                        // the actor will reconsume all queued messages if is Operational
+                        // and browser is already initialized
+                        // so let help them to follolow that pattern
+                        Self.Tell(new ConsumeNext());
                         return GoTo(States.Operational);
 
                     case PageLocatingResult<CheckVatinResultPage> msg when !msg.Success:
@@ -217,6 +255,11 @@ namespace Backend
                     default:
                         return Stay();
                 }
+            });
+
+            OnTransition((from, to) =>
+            {
+                log.Info($"Transition {this.Self} from {from} to {to}");
             });
 
             Initialize();

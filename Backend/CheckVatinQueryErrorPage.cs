@@ -60,7 +60,8 @@ namespace Backend
                     // in fact we don't need it selected, but it is known property
                     // wchich throws StaleElementReferenceException when element is not yet on the browser DOM model.
                 } while (!element.Selected);
-            } catch (StaleElementReferenceException)
+            }
+            catch (StaleElementReferenceException)
             {
 
             }
@@ -69,17 +70,30 @@ namespace Backend
         private void OnVatin(string value)
         {
             var element = default(IWebElement);
+            const string id = "b-7";
 
-            var now = DateTime.Now;
-            while (DateTime.Now - now < TimeSpan.FromSeconds(10))
             {
-                element = driver.FindElements(By.Id("b-7")).FirstOrDefault();
-                if (element != null) break;
+                var now = DateTime.Now;
+                while (DateTime.Now - now < TimeSpan.FromSeconds(10))
+                {
+                    element = driver.FindElements(By.Id(id)).FirstOrDefault();
+                    if (element != null) break;
+                }
+
+                if (element == null) throw new NoSuchElementException();
             }
 
-            if (element == null) throw new NoSuchElementException();
+            {
+                var now = DateTime.Now;
+                while (DateTime.Now - now < TimeSpan.FromSeconds(10))
+                {
+                    // in some cases only part of value is sent to element
+                    element.SendKeys(value);
+                    if (element.Text == value) break;
 
-            element.SendKeys(value);
+                    element.Clear();
+                }
+            }
         }
     }
 }

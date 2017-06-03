@@ -37,20 +37,70 @@ namespace Backend
 
                     await Task.Delay(100);
 
+                    try
                     {
-                        // button 'Sprawdź' need to be visible
-                        var element = driver.FindElements(By.Id("b-8")).FirstOrDefault();
-                        if (element == null) continue;
-                        if (!element.Displayed) continue;
-                        if (element.Text != "Sprawdź") continue;
+                        int tries = 10;
+                        while (true)
+                        {
+                            try
+                            {
+                                // button 'Sprawdź' need to be visible
+                                var element = driver.FindElements(By.Id("b-8")).FirstOrDefault();
+                                if (element == null) continue;
+                                if (!element.Displayed) continue;
+                                
+                                if (element.Text != "Sprawdź") continue;
+
+                                break;
+                            }
+                            catch (StaleElementReferenceException ex)
+                            {
+                                if (tries-- > 0) continue;
+                                else throw;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        tcs.SetException(ex);
+                        return;
                     }
 
+
+
+                    try
                     {
-                        // button 'Wyczyść' need to be hidden
-                        var element = driver.FindElements(By.Id("b-9")).FirstOrDefault();
-                        if (element == null) continue;
-                        if (element.Displayed) continue;
+                        int tries = 10;
+                        while (true)
+                        {
+                            try
+                            {
+                                // button 'Wyczyść' need to be hidden
+                                var element = driver.FindElements(By.Id("b-9")).FirstOrDefault();
+                                if (element == null) continue;
+                                if (element.Displayed) {
+                                    if (tries-- > 0) continue;
+                                    tcs.SetException(new InvalidOperationException());
+                                    return;
+                                }
+
+                                break;
+                            }
+                            catch (StaleElementReferenceException ex)
+                            {
+                                if (tries-- > 0) continue;
+                                else throw;
+                            }
+                        }
                     }
+                    catch (Exception ex)
+                    {
+                        tcs.SetException(ex);
+                        return;
+                    }
+
+
+
 
                     tcs.SetResult(null);
                     return;
