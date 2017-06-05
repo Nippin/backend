@@ -152,7 +152,7 @@ namespace Backend
                         // The simplest scenario is to kill the actor and 
                         // assume the instance will be replaced with a new instance.
                         // so the first - suicide
-                        throw new InvalidOperationException();
+                        throw new PageUnavailableException();
 
                     default:
                         return null;

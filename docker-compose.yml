@@ -2,6 +2,6 @@ version: '2'
 services:
   selenium:
     container_name: selenium-chrome
-    image: selenium/standalone-chrome
+    image: selenium/standalone-chrome:3.0.1
     ports:
       - "4444:4444"

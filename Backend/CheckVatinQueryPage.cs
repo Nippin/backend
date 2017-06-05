@@ -4,6 +4,8 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
+using Nippin;
+using System.Reactive.Linq;
 
 namespace Backend
 {
@@ -23,108 +25,46 @@ namespace Backend
 
         public Task Identified(CancellationToken deadline)
         {
-            var tcs = new TaskCompletionSource<object>();
-
-            Task.Run(async () =>
+            var req1 = driver.Repeat(() =>
             {
-                while (true)
-                {
-                    if (deadline.IsCancellationRequested)
-                    {
-                        tcs.SetCanceled();
-                        return;
-                    }
+                var element = driver.FindElements(By.Id("b-8")).FirstOrDefault();
+                if (element == null) return false;
+                if (!element.Displayed) return false;
 
-                    await Task.Delay(100);
+                if (element.Text != "Sprawdź") return false;
 
-                    try
-                    {
-                        int tries = 10;
-                        while (true)
-                        {
-                            try
-                            {
-                                // button 'Sprawdź' need to be visible
-                                var element = driver.FindElements(By.Id("b-8")).FirstOrDefault();
-                                if (element == null) continue;
-                                if (!element.Displayed) continue;
-                                
-                                if (element.Text != "Sprawdź") continue;
+                return true;
+            }, deadline);
 
-                                break;
-                            }
-                            catch (StaleElementReferenceException ex)
-                            {
-                                if (tries-- > 0) continue;
-                                else throw;
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        tcs.SetException(ex);
-                        return;
-                    }
+            var req2 = driver.Repeat(() =>
+            {
+                // button 'Wyczyść' need to be hidden
+                var element = driver.FindElements(By.Id("b-9")).FirstOrDefault();
+                if (element == null) return false; ;
+                if (element.Displayed) return false;
 
+                return true;
+            }, deadline);
 
-
-                    try
-                    {
-                        int tries = 10;
-                        while (true)
-                        {
-                            try
-                            {
-                                // button 'Wyczyść' need to be hidden
-                                var element = driver.FindElements(By.Id("b-9")).FirstOrDefault();
-                                if (element == null) continue;
-                                if (element.Displayed) {
-                                    if (tries-- > 0) continue;
-                                    tcs.SetException(new InvalidOperationException());
-                                    return;
-                                }
-
-                                break;
-                            }
-                            catch (StaleElementReferenceException ex)
-                            {
-                                if (tries-- > 0) continue;
-                                else throw;
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        tcs.SetException(ex);
-                        return;
-                    }
-
-
-
-
-                    tcs.SetResult(null);
-                    return;
-                }
-            });
-
-            return tcs.Task;
+            return Task.WhenAll(req1, req2);
         }
+
 
         private void OnSubmit()
         {
             var element = default(IWebElement);
 
-            var now = DateTime.Now;
-            while (DateTime.Now - now < TimeSpan.FromSeconds(10))
+            driver.Repeat(() =>
             {
-                element = driver.FindElements(By.Id("b-8")).FirstOrDefault();
+                var current = driver.FindElements(By.Id("b-8")).FirstOrDefault();
 
-                if (element == null) continue;
+                if (current == null) return false;
+                if (!current.Displayed) return false;
 
-                break;
-            }
-
-            if (element == null) throw new NoSuchElementException();
+                element = current;
+                return true;
+            }, new CancellationTokenSource(10.Seconds()).Token)
+            .Wait();
 
             element.Click();
         }
@@ -133,16 +73,31 @@ namespace Backend
         {
             var element = default(IWebElement);
 
-            var now = DateTime.Now;
-            while (DateTime.Now - now < TimeSpan.FromSeconds(10))
             {
-                element = driver.FindElements(By.Id("b-7")).FirstOrDefault();
-                if (element != null) break;
+                var now = DateTime.Now;
+                while (DateTime.Now - now < TimeSpan.FromSeconds(10))
+                {
+                    element = driver.FindElements(By.Id("b-7")).FirstOrDefault();
+                    if (element != null) break;
+                }
             }
 
             if (element == null) throw new NoSuchElementException();
 
-            element.SendKeys(value);
+            {
+                var now = DateTime.Now;
+                while (DateTime.Now - now < TimeSpan.FromSeconds(10))
+                {
+                    // in some cases only part of value is sent to element
+                    element.SendKeys(value);
+
+                    var actual = element.GetAttribute("value");
+                    if (actual == value) break;
+
+                    element.Clear();
+                }
+            }
+
         }
     }
 }
