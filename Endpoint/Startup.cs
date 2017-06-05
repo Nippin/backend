@@ -42,6 +42,9 @@ namespace Endpoint
 
             // Register the IConfiguration instance which MyOptions binds against.
             services.Configure<SeleniumOptions>(Configuration);
+
+            // Enable connection from external JavaScript client.
+            services.AddCors();
         }
     }
 }
