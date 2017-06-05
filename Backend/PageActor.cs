@@ -80,13 +80,21 @@ namespace Backend
         /// </summary>
         public sealed class CheckVatinReply
         {
-            public CheckVatinReply(bool done, string screenshot)
+            public enum VatinPayerStatus
+            {
+                Unknown = 0,
+                IsTaxPayer = 1
+            }
+
+            public CheckVatinReply(bool done, string screenshot, VatinPayerStatus status)
             {
                 Done = done;
                 Screenshot = screenshot;
+                Status = status;
             }
-            public bool Done { get; set; }
-            public string Screenshot { get; set; }
+            public bool Done { get; private set; }
+            public string Screenshot { get; private set; }
+            public VatinPayerStatus Status { get; private set; }
         }
 
         /// <summary>
@@ -223,7 +231,7 @@ namespace Backend
 
                     case PageLocatingResult<CheckVatinResultPage> msg when msg.Success:
                         var screenshot = msg.Page.Print();
-                        StateData.Requestor.Tell(new CheckVatinReply(true, screenshot));
+                        StateData.Requestor.Tell(new CheckVatinReply(true, screenshot, msg.Page.Status));
                         msg.Page.Clear();
 
                         // the actor will reconsume all queued messages if is Operational

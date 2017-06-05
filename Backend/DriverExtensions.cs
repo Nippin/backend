@@ -8,6 +8,13 @@ namespace Nippin
 {
     public static class DriverExtensions
     {
+        /// <summary>
+        /// Waits some time and checks with predicate if page is recognized.
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="operation">Logice responsible to recognize page. REturns false if page is not available, otherwise true.</param>
+        /// <param name="deadline"></param>
+        /// <returns></returns>
         public static Task Repeat(this RemoteWebDriver driver, Func<bool> operation, CancellationToken deadline)
         {
             return Repeat(driver, operation, deadline, 10, 300);

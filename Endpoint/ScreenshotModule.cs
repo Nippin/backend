@@ -37,7 +37,10 @@ namespace Endpoint
 
                     Console.WriteLine("Dupa5");
 
-                    return result.AsAttachment($"{id} {DateTime.Now:yyyy-MM-dd}.png");
+                    var status = response.Status == PageActor.CheckVatinReply.VatinPayerStatus.IsTaxPayer
+                        ? "Aktywny"
+                        : "Inny";
+                    return result.AsAttachment($"{id} {DateTime.Now:yyyy-MM-dd} {status}.png");
                 }
                 catch (Exception e)
                 {

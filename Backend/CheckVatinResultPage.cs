@@ -5,12 +5,14 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
+using static Backend.PageActor;
 
 namespace Backend
 {
     public sealed class CheckVatinResultPage : IPage
     {
         public Action Clear { get; private set; }
+        public CheckVatinReply.VatinPayerStatus Status { get; private set; }
 
         private RemoteWebDriver driver;
 
@@ -29,100 +31,42 @@ namespace Backend
         /// <returns>Task completed if elements have been found.</returns>
         public Task Identified(CancellationToken deadline)
         {
-            var tcs = new TaskCompletionSource<object>();
-
-            Task.Run(async () =>
+            var clearElementExists = driver.Repeat(() =>
             {
-                while (true)
-                {
-                    if (deadline.IsCancellationRequested)
-                    {
-                        tcs.SetCanceled();
-                        return;
-                    }
+                // button 'Wyczyść'
+                var element = driver.FindElements(By.Id("b-9")).FirstOrDefault();
+                if (element == null) return false;
+                if (!element.Displayed) return false;
 
-                    try
-                    {
-                        int tries = 10;
-                        while (true)
-                        {
-                            await Task.Delay(1000);
+                return true;
+            }, deadline);
 
-                            try
-                            {
-                                // button 'Wyczyść'
-                                var element = driver.FindElements(By.Id("b-9")).FirstOrDefault();
-                                if (element == null)
-                                {
-                                    tries--;
-                                    if (tries > 0) continue;
+            var checkingDateExists = driver.Repeat(() =>
+            {
+                var element = driver.FindElements(By.Id("caption2_b-b")).FirstOrDefault();
+                if (element == null) return false;
+                if (!element.Displayed) return false;
+                var content = element.Text;
+                if (!content.StartsWith("Data sprawdzenia:")) return false;
 
-                                    tcs.SetException(new InvalidOperationException("b-9 button doesn't exist"));
-                                    return;
-                                }
+                return true;
+            }, deadline);
 
-                                if (!element.Displayed)
-                                {
-                                    tcs.SetException(new InvalidOperationException("b-9 button is invisible"));
-                                    return;
-                                }
+            var descriptionExists = driver.Repeat(() =>
+            {
+                var element = driver.FindElements(By.Id("caption2_b-3")).FirstOrDefault();
+                if (element == null) return false;
+                if (!element.Displayed) return false;
+                var content = element.Text;
+                Status = content.StartsWith("Podmiot o podanym identyfikatorze podatkowym NIP jest zarejestrowany jako podatnik VAT czynny")
+                    ? CheckVatinReply.VatinPayerStatus.IsTaxPayer
+                    : CheckVatinReply.VatinPayerStatus.Unknown;
 
-                                break;
-                            }
-                            catch (StaleElementReferenceException)
-                            {
-                                if (tries-- > 0) continue;
-                                else throw;
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        tcs.SetException(ex);
-                        return;
-                    }
+                return true;
+            }, deadline);
 
 
-
-
-                    try
-                    {
-                        int tries = 10;
-                        while (true)
-                        {
-                            await Task.Delay(1000);
-
-                            try
-                            {
-                                var element = driver.FindElements(By.Id("caption2_b-b")).FirstOrDefault();
-                                if (element == null) continue;
-                                if (!element.Displayed) continue;
-                                var content = element.Text;
-                                if (!content.StartsWith("Data sprawdzenia:")) continue;
-
-                                break;
-                            }
-                            catch (StaleElementReferenceException)
-                            {
-                                if (tries-- > 0) continue;
-                                else throw;
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        tcs.SetException(ex);
-                        return;
-                    }
-
-
-                    tcs.SetResult(null);
-                    return;
-                }
-            })
-            .ContinueWith(t => tcs.SetException(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
-
-            return tcs.Task;
+            return Task.WhenAll(clearElementExists, checkingDateExists, descriptionExists);
         }
 
         public string Print()
