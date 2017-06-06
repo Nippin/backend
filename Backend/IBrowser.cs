@@ -41,9 +41,10 @@ namespace Backend
         Task<TPage> Expect<TPage>(CancellationToken deadline) where TPage : IPage, new();
 
         /// <summary>
-        /// Returns current screenshot fro mthe browser instance.
+        /// Covers any browser-neutral menthod invoked on the browser to keep it
+        /// live. In other case in 30 mins Selenium will shoutdown chrome 
+        /// browser because of no activity.
         /// </summary>
-        /// <returns>Screenshot</returns>
-        Task<Screenshot> GetScreenshot();
+        void Touch();
     }
 }

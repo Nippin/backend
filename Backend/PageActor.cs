@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Nippin;
 using Akka.Event;
+using System.Reactive.Disposables;
 
 namespace Backend
 {
@@ -15,6 +16,9 @@ namespace Backend
     public sealed class PageActor : FSM<States, (IActorRef Requestor, string Vatin, DateTime Requested)>, IWithUnboundedStash
     {
         private readonly ILoggingAdapter log = Logging.GetLogger(Context);
+
+        // Contains all disposable elements to allow dispose them with end of lifetime of the current instance.
+        private readonly CompositeDisposable disposer = new CompositeDisposable();
 
         public enum States
         {
@@ -97,16 +101,18 @@ namespace Backend
             public VatinPayerStatus Status { get; private set; }
         }
 
+        // Heartbeat message means that it is time to touch browser to keep them live.
+        public sealed class BrowserNeedBeTouched { }
+
         /// <summary>
         /// Indicates the underlying browser is ready to work.
         /// </summary>
-        public sealed class BrowserInitialized
-        {
-        }
+        public sealed class BrowserInitialized { }
 
-        public sealed class ConsumeNext
-        {
-        }
+        /// <summary>
+        /// Artificial message sent to push message processing
+        /// </summary>
+        public sealed class ConsumeNext { }
 
         public sealed class GoToCheckkVatinPageFinished
         {
@@ -124,7 +130,7 @@ namespace Backend
 
         public PageActor(Func<IBrowser> browserFactory)
         {
-            browser = browserFactory();
+            browser = browserFactory().DisposeWith(disposer);
 
             base.StartWith(States.Initialized, (null, null, DateTime.Now));
 
@@ -260,6 +266,9 @@ namespace Backend
                     case CheckVatinAsk msg:
                         Stash.Stash();
                         return Stay();
+                    case BrowserNeedBeTouched msg:
+                        browser.Touch();
+                        return Stay();
                     default:
                         return Stay();
                 }
@@ -279,12 +288,17 @@ namespace Backend
 
             Self.Tell(new BrowserInitialized());
 
+            Context.System.Scheduler.ScheduleTellRepeatedly(10.Minutes(), 10.Minutes(), Self, new BrowserNeedBeTouched(), ActorRefs.Nobody);
+
             base.PreStart();
         }
 
+        private void KeepBrowserLive()
+        {
+        }
         protected override void PostStop()
         {
-            browser.Dispose();
+            disposer.Dispose();
 
             base.PostStop();
         }

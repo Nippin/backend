@@ -6,5 +6,7 @@ namespace Nippin
     {
         public static TimeSpan Seconds(this int value) => TimeSpan.FromSeconds(value);
 
+        public static TimeSpan Minutes(this int value) => TimeSpan.FromMinutes(value);
+
     }
 }

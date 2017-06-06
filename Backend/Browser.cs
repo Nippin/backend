@@ -78,17 +78,22 @@ namespace Backend
             return result.Task;
         }
 
-        public Task<Screenshot> GetScreenshot()
-        {
-            throw new NotImplementedException();
-        }
-
         public Task GoToUrl(string url)
         {
             return Task.Run(() =>
             {
                 driver.Navigate().GoToUrl(url);
             });
+        }
+
+        /// <summary>
+        /// Browser-neutral operation is to get screenshot.
+        /// 
+        /// Maybe it is a bit too expensive but it really touch the broewser.
+        /// </summary>
+        public void Touch()
+        {
+            var ignored = driver.GetScreenshot();
         }
     }
 }

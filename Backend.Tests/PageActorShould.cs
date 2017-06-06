@@ -7,11 +7,19 @@ using System.Threading.Tasks;
 using Xunit;
 using Backend;
 using static Backend.PageActor;
+using Akka.TestKit;
 
 namespace Nippin
 {
     public sealed class PageActorShould : TestKit
     {
+        /// <summary>
+        /// For testing purpose we need to use TestScheduler to maintain virtual time.
+        /// see https://petabridge.com/blog/how-to-unit-test-akkadotnet-actors-akka-testkit/
+        /// </summary>
+        public PageActorShould()
+            : base(@"akka.scheduler.implementation = ""Akka.TestKit.TestScheduler, Akka.TestKit""") { }
+
         /// <summary>
         /// When PageActor can't initialize browser, need to make suicide because the actor
         /// and browser instance are double linked in term of lifecycle.
@@ -20,10 +28,10 @@ namespace Nippin
         public void FailWhenCantConnectToBrowser()
         {
             var browser = Substitute.For<IBrowser>();
-            browser.When(b =>  b.Initialize())
+            browser.When(b => b.Initialize())
                 .Throw(new Exception());
 
-            var actor = ActorOfAsTestFSMRef<PageActor, States, (IActorRef, string, DateTime) >(() => new PageActor(() => browser));
+            var actor = ActorOfAsTestFSMRef<PageActor, States, (IActorRef, string, DateTime)>(() => new PageActor(() => browser));
             var prober = CreateTestProbe();
             prober.Watch(actor);
             prober.ExpectTerminated(actor);
@@ -68,6 +76,29 @@ namespace Nippin
 
             Assert.True(reply.Done);
             Assert.NotEmpty(reply.Screenshot);
+        }
+
+        /// <summary>
+        /// Browsers managed by SeleniumGrid are shut downed after 30 mins so
+        /// PageActor is disconnected without any notification and can't continue work.
+        /// 
+        /// To avoid this, the simples seems to be repeatable touching browser by Selenium Api.
+        /// </summary>
+        [Fact]
+        public void TouchBrowser()
+        {
+            var browser = Substitute.For<IBrowser>();
+
+            var actor = ActorOfAsTestFSMRef<PageActor, States, (IActorRef, string, DateTime)>(
+                Props.Create(() => new PageActor(() => browser)));
+
+            browser.DidNotReceive().Touch();
+
+
+            var scheduler = (TestScheduler)Sys.Scheduler;
+            scheduler.Advance(10.Minutes() + 1.Seconds());
+
+            browser.Received().Touch();
         }
 
     }
