@@ -47,6 +47,7 @@ namespace Endpoint
                     // This extra header is expected by frontend part of Nippin
                     // because there is no other way to send file name to JavaScript client.
                     result.Headers.Add("AttachmentFileName", attachmentFileName);
+                    result.Headers.Add("Access-Control-Expose-Headers", "Accept,Origin,Content-type,AttachmentFileName");
 
                     return result.AsAttachment(attachmentFileName);
                 }
