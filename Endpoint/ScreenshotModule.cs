@@ -37,10 +37,18 @@ namespace Endpoint
 
                     Console.WriteLine("Dupa5");
 
+                    // filename should be human-readable with quick infor about staus of VAT 
+                    // taxpayer (active or not), VATIN no and date of check
                     var status = response.Status == PageActor.CheckVatinReply.VatinPayerStatus.IsTaxPayer
                         ? "Aktywny"
                         : "Inny";
-                    return result.AsAttachment($"{id} {DateTime.Now:yyyy-MM-dd} {status}.png");
+                    var attachmentFileName = $"{id} {DateTime.Now:yyyy-MM-dd} {status}.png";
+
+                    // This extra header is expected by frontend part of Nippin
+                    // because there is no other way to send file name to JavaScript client.
+                    result.Headers.Add("AttachmentFileName", attachmentFileName);
+
+                    return result.AsAttachment(attachmentFileName);
                 }
                 catch (Exception e)
                 {

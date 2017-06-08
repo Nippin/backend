@@ -81,7 +81,7 @@ namespace Nippin
         }
 
         [Fact]
-        public async Task ReturnScreenshot()
+        public async Task ReturnScreenshotWithFileName()
         {
             var cts = new CancellationTokenSource();
             using (Disposable.Create(() => cts.Cancel()))
@@ -97,6 +97,10 @@ namespace Nippin
 
                 // Then
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                // This extra header is expected by frontend part of Nippin
+                // because there is no other way to send file name to JavaScript client.
+                Assert.True(response.Headers.ContainsKey("AttachmentFileName"));
             }
         }
 
